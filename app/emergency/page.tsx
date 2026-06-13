@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -257,20 +257,12 @@ export default function EmergencyPage() {
     }
   }, [searchQuery, openNia]);
 
-  // Live detection as user types
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setHighlightedCategory(null);
-      return;
-    }
-
-    const detected = detectEmergencyCategory(searchQuery);
-    if (detected) {
-      setHighlightedCategory(detected.id);
-    } else {
-      setHighlightedCategory(null);
-    }
+  const liveDetectedCategoryId = useMemo(() => {
+    if (!searchQuery.trim()) return null;
+    return detectEmergencyCategory(searchQuery)?.id ?? null;
   }, [searchQuery]);
+
+  const visibleHighlightedCategory = highlightedCategory ?? liveDetectedCategoryId;
 
   // Customize kit — opens Nia with context
   const handleCustomize = useCallback(() => {
@@ -370,7 +362,7 @@ export default function EmergencyPage() {
               className={`flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-xl border-2 transition-colors ${
                 isListening
                   ? 'border-red-400 bg-red-50/95'
-                  : highlightedCategory
+                  : visibleHighlightedCategory
                   ? 'border-green-400'
                   : 'border-white/50 focus-within:border-white'
               }`}
@@ -439,7 +431,7 @@ export default function EmergencyPage() {
 
             {/* Auto-detected category hint */}
             <AnimatePresence>
-              {highlightedCategory && (
+              {visibleHighlightedCategory && (
                 <motion.p
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -449,7 +441,7 @@ export default function EmergencyPage() {
                   <span className="text-green-300">✓</span>
                   Detected:{' '}
                   <strong>
-                    {emergencyCategories.find((c) => c.id === highlightedCategory)?.name}
+                    {emergencyCategories.find((c) => c.id === visibleHighlightedCategory)?.name}
                   </strong>{' '}
                   — tap Enter or the tile below
                 </motion.p>
@@ -462,11 +454,11 @@ export default function EmergencyPage() {
       {/* ── Category Grid ── */}
       <main className="max-w-4xl mx-auto px-4 py-6 sm:py-8" ref={gridRef}>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          {emergencyCategories.map((category, idx) => {
+          {emergencyCategories.map((category) => {
             // Determine which row this tile is on (mobile: 2 cols, desktop: 4 cols)
             // We need to insert the expanded kit view after the correct row
             const isActive = activeCategory === category.id;
-            const isHighlighted = highlightedCategory === category.id;
+            const isHighlighted = visibleHighlightedCategory === category.id;
 
             return (
               <EmergencyCategoryTile

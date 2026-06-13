@@ -278,7 +278,9 @@ export function detectEmergencyCategory(query: string): EmergencyCategory | null
  * calculates actual ETA from the logistics service, and applies any user-specific
  * substitutions or preferences.
  */
-export function generateEmergencyKit(categoryId: string, _pincode: string = '110001'): EmergencyKitData | null {
+export function generateEmergencyKit(categoryId: string, pincode: string = '110001'): EmergencyKitData | null {
+  void pincode;
+
   const category = emergencyCategories.find((c) => c.id === categoryId);
   if (!category) return null;
 

@@ -247,6 +247,7 @@ const feverEmergencyKit: EmergencyKit = {
   categoryColor: '#EF5350',
   categoryEmoji: '🤒',
 };
+void feverEmergencyKit;
 
 // ─── Mock Data: Budget Alternatives ─────────────────────────────────────────
 
