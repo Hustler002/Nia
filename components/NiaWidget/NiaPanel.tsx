@@ -246,8 +246,20 @@ export default function NiaPanel() {
           }
           
           // ALWAYS update the "Suggested" grid if the AI returns any product array
-          // Sometimes the LLM uses type 'text' but still includes the data, so we check data presence instead.
           useNiaChatStore.getState().setRelatedProducts(niaMsg.data);
+        }
+
+        // --- Autonomous Checkout (direct_checkout tool result) ---
+        if (niaMsg.type === 'direct_checkout' && niaMsg.data && !Array.isArray(niaMsg.data)) {
+          const checkoutData = niaMsg.data as any;
+          if (checkoutData.item) {
+            useNiaChatStore.getState().addToCart(checkoutData.item);
+          }
+          const addressLabel = checkoutData.address?.label || 'home';
+          // Small delay so user can read Nia's message, then redirect
+          setTimeout(() => {
+            router.push(`/payment?address=${encodeURIComponent(addressLabel)}`);
+          }, 1500);
         }
 
         // Update quick chips from response if available

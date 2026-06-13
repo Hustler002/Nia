@@ -17,12 +17,14 @@ export interface Product {
   rating: number;
   reviewCount: number;
   imageUrl: string;
+  image?: string; // alias used in CartItem
   tags: string[];
   attributes: Record<string, string>;
   inStock: boolean;
   eta_minutes: number;
   isOrganic?: boolean;
   isVegetarian?: boolean;
+  lifespanDays?: number; // how many days one unit typically lasts — used by consumptionEngine
 }
 
 export const CATALOG: Product[] = [
@@ -46,8 +48,8 @@ export const CATALOG: Product[] = [
   { id: 'p-b7', name: "Monster Energy Original", brand: "Monster", category: 'Beverages', subcategory: 'Energy Drinks', price: 120, mrp: 130, unit: '500ml', rating: 4.5, reviewCount: 3500, imageUrl: '⚡', tags: ['energy drink', 'gym', 'workout', 'pre-workout', 'caffeine', 'fitness'], attributes: { Caffeine: '160mg', Type: 'Energy Drink' }, inStock: true, eta_minutes: 12, isVegetarian: true },
   { id: 'p-b8', name: "Sting Energy Drink", brand: "PepsiCo", category: 'Beverages', subcategory: 'Energy Drinks', price: 30, mrp: 30, unit: '250ml', rating: 4.3, reviewCount: 5000, imageUrl: '⚡', tags: ['energy drink', 'gym', 'workout', 'caffeine', 'cheap'], attributes: { Caffeine: '80mg', Type: 'Energy Drink' }, inStock: true, eta_minutes: 9, isVegetarian: true },
 
-  // Dairy
-  { id: 'p-d1', name: "Amul Taaza Toned Milk", brand: "Amul", category: 'Dairy', subcategory: 'Milk', price: 54, mrp: 54, unit: '1L', rating: 4.9, reviewCount: 10000, imageUrl: '🥛', tags: ['milk', 'doodh', 'toned', 'daily'], attributes: { Fat: '3%', Type: 'Toned Milk' }, inStock: true, eta_minutes: 8, isVegetarian: true },
+  // Dairy — short lifespan items
+  { id: 'p-d1', name: "Amul Taaza Toned Milk", brand: "Amul", category: 'Dairy', subcategory: 'Milk', price: 54, mrp: 54, unit: '1L', rating: 4.9, reviewCount: 10000, imageUrl: '🥛', tags: ['milk', 'doodh', 'toned', 'daily'], attributes: { Fat: '3%', Type: 'Toned Milk' }, inStock: true, eta_minutes: 8, isVegetarian: true, lifespanDays: 2 },
   { id: 'p-d2', name: "Amul Butter Pasteurized", brand: "Amul", category: 'Dairy', subcategory: 'Butter', price: 58, mrp: 58, unit: '100g', rating: 4.9, reviewCount: 8000, imageUrl: '🧈', tags: ['butter', 'makhan', 'salty', 'bread'], attributes: { Type: 'Salted Butter' }, inStock: true, eta_minutes: 9, isVegetarian: true },
   { id: 'p-d3', name: "Mother Dairy Classic Curd", brand: "Mother Dairy", category: 'Dairy', subcategory: 'Curd', price: 32, mrp: 32, unit: '400g', rating: 4.7, reviewCount: 3000, imageUrl: '🥣', tags: ['curd', 'dahi', 'yogurt'], attributes: { Type: 'Curd' }, inStock: true, eta_minutes: 8, isVegetarian: true },
   { id: 'p-d4', name: "Britannia Cheese Slices", brand: "Britannia", category: 'Dairy', subcategory: 'Cheese', price: 125, mrp: 130, unit: '200g (10 slices)', rating: 4.5, reviewCount: 2000, imageUrl: '🧀', tags: ['cheese', 'slice', 'burger', 'sandwich'], attributes: { Type: 'Processed Cheese' }, inStock: true, eta_minutes: 10, isVegetarian: true },

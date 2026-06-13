@@ -1,12 +1,12 @@
 // app/layout.tsx
 // Root layout for the Nia Amazon Now application
-// Wraps all pages with NiaProvider for global chat state
+// Wraps all pages with ClerkProvider (auth) + NiaProvider (chat state)
 // Renders the persistent Nia chat widget (trigger + panel) on every page
-// Production: add analytics, auth provider, error boundary
 
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
 import NiaProvider from "@/components/NiaProvider";
 import NiaPanel from "@/components/NiaWidget/NiaPanel";
 import NiaTrigger from "@/components/NiaWidget/NiaTrigger";
@@ -41,15 +41,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-white text-[#0F1111]">
-        <NiaProvider>
-          {children}
-          {/* Persistent Nia floating widget — visible on all pages */}
-          <NiaPanel />
-          <NiaTrigger />
-        </NiaProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
+        <body className="min-h-full flex flex-col bg-white text-[#0F1111]">
+          <NiaProvider>
+            {children}
+            {/* Persistent Nia floating widget — visible on all pages */}
+            <NiaPanel />
+            <NiaTrigger />
+          </NiaProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
