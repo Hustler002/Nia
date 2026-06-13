@@ -11,6 +11,7 @@ import type {
   EmergencyKit,
   ReorderNudge,
 } from './useNiaStore';
+import { detectEmergencyCategory, generateEmergencyKit } from './emergency/categories';
 
 // ─── Mock Data: Movie Night Cart ────────────────────────────────────────────
 
@@ -243,6 +244,8 @@ const feverEmergencyKit: EmergencyKit = {
   ],
   totalPrice: 417,
   eta: '~10 min',
+  categoryColor: '#EF5350',
+  categoryEmoji: '🤒',
 };
 
 // ─── Mock Data: Budget Alternatives ─────────────────────────────────────────
@@ -368,25 +371,43 @@ export function routeQuery(query: string): MockResponse {
     };
   }
 
-  // Fever / emergency
-  if (
-    lower.includes('fever') ||
-    lower.includes('sick') ||
-    lower.includes('medicine') ||
-    lower.includes('cold') ||
-    lower.includes('headache')
-  ) {
-    return {
-      content:
-        "🚨 Switching to Emergency Mode. I've put together a fever care kit — everything you need, delivering in ~10 minutes.",
-      type: 'emergency_kit',
-      data: feverEmergencyKit,
-      quickChips: [
-        'Add more medicines 💊',
-        'Track my order 📦',
-        'I feel better now ☀️',
-      ],
-    };
+  // Emergency detection — matches all 8 categories using trigger phrases
+  const detectedCategory = detectEmergencyCategory(lower);
+  if (detectedCategory) {
+    // Generate a kit for the detected category
+    const generatedKit = generateEmergencyKit(detectedCategory.id);
+    if (generatedKit) {
+      // Convert EmergencyKitData to the EmergencyKit type used by the store
+      const emergencyKit: EmergencyKit = {
+        category: generatedKit.categoryId,
+        name: `${generatedKit.categoryEmoji} ${generatedKit.name}`,
+        items: generatedKit.items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          mrp: item.mrp,
+          image: item.image,
+          qty: item.qty,
+          category: item.category,
+        })),
+        totalPrice: generatedKit.totalPrice,
+        eta: generatedKit.eta,
+        categoryColor: generatedKit.categoryColor,
+        categoryEmoji: generatedKit.categoryEmoji,
+      };
+
+      return {
+        content:
+          `🚨 Switching to Emergency Mode — ${detectedCategory.name}. I've assembled a ${generatedKit.name.toLowerCase()} with everything you need, delivering in ${generatedKit.eta}. 📍 Open Emergency Page for more options.`,
+        type: 'emergency_kit',
+        data: emergencyKit,
+        quickChips: [
+          'Add more items 🛒',
+          'Open Emergency Page 🚨',
+          'I\'m all sorted now ☀️',
+        ],
+      };
+    }
   }
 
   // Budget / cheaper alternatives

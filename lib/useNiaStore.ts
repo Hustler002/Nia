@@ -44,6 +44,8 @@ export interface EmergencyKit {
   items: CartItem[];
   totalPrice: number;
   eta: string;
+  categoryColor?: string; // hex color for category-coded UI (e.g. #EF5350 for fever)
+  categoryEmoji?: string; // emoji icon for the category (e.g. 🤒)
 }
 
 export interface ReorderNudge {
