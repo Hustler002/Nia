@@ -10,6 +10,7 @@ import HeroSection from "@/components/HeroSection";
 import EmergencyBanner from "@/components/EmergencyBanner";
 import ReorderRow from "@/components/ReorderRow";
 import RitualRow from "@/components/RitualRow";
+import { RitualsRow } from "@/components/Rituals";
 import CategoryGrid from "@/components/CategoryGrid";
 
 export default function HomePage() {
@@ -28,8 +29,8 @@ export default function HomePage() {
         {/* AI-predicted reorder suggestions */}
         <ReorderRow />
 
-        {/* Recurring ritual bundles */}
-        <RitualRow />
+        {/* Recurring ritual bundles (Module 4B) */}
+        <RitualsRow />
 
         {/* Browse by category */}
         <CategoryGrid />
