@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #0F1111;
+  --nia-teal: #00838F;
+  --nia-teal-light: #E0F2F1;
+  --amazon-orange: #FF9900;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Custom animations */
+  --animate-nia-pulse: nia-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float-slow: float-slow 6s ease-in-out infinite;
+  --animate-float-medium: float-medium 4s ease-in-out infinite;
+  --animate-float-fast: float-fast 3s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.3s ease-out;
+  --animate-slide-left: slide-left 0.3s ease-out;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Amazon Ember", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Nia avatar pulse animation */
+@keyframes nia-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* Floating decorative dots */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  33% { transform: translateY(-12px) translateX(6px); }
+  66% { transform: translateY(8px) translateX(-4px); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-18px) translateX(-8px); }
+}
+
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Chat panel slide animations */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-left {
+  from {
+    transform: translateX(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Hide scrollbar for horizontal scroll rows */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth text rendering */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Waveform animation for Nia trigger button */
+@keyframes waveform {
+  0%, 100% { height: 12px; }
+  50% { height: 20px; }
+}
+
+/* Emergency pulse animation for urgent CTAs */
+@keyframes emergency-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 153, 0, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 153, 0, 0); }
+}
+
+/* Pulsing red dot for emergency status */
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
