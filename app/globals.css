@@ -115,38 +115,3 @@ body {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(0.8); }
 }
-
-/* Emergency page: pulsing border glow when a category is auto-detected */
-@keyframes category-highlight {
-  0%, 100% { box-shadow: 0 0 0 0 var(--highlight-color, rgba(255, 153, 0, 0.5)); }
-  50% { box-shadow: 0 0 0 8px var(--highlight-color, rgba(255, 153, 0, 0)); }
-}
-
-/* Emergency page: smooth height expansion for inline kit view */
-@keyframes kit-expand {
-  from { opacity: 0; max-height: 0; transform: translateY(-8px); }
-  to { opacity: 1; max-height: 2000px; transform: translateY(0); }
-}
-
-/* Emergency page: subtle shimmer on header gradient */
-@keyframes urgent-shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-/* Emergency category tile active ring animation */
-.emergency-tile-active {
-  animation: category-highlight 1.5s ease-in-out infinite;
-}
-
-/* Emergency kit expand animation */
-.kit-expand-enter {
-  animation: kit-expand 0.4s ease-out forwards;
-}
-
-/* Header shimmer overlay */
-.urgent-shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
-  background-size: 200% 100%;
-  animation: urgent-shimmer 3s linear infinite;
-}

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import type { CartItem } from '@/lib/useNiaStore';
+import { useNiaChatStore } from '@/lib/useNiaStore';
 
 // ─── Props ──────────────────────────────────────────────────────────────────
 interface CartSummaryCardProps {
@@ -11,6 +12,9 @@ interface CartSummaryCardProps {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 export default function CartSummaryCard({ items, content }: CartSummaryCardProps) {
+  const { addToCart } = useNiaChatStore();
+  const [addedAll, setAddedAll] = useState(false);
+
   // Local qty state — cloned from props so user edits don't mutate upstream data
   const [quantities, setQuantities] = useState<Record<string, number>>(() =>
     Object.fromEntries(items.map((item) => [item.id, item.qty]))
@@ -23,6 +27,14 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
       [id]: Math.max(1, (prev[id] ?? 1) + delta),
     }));
   }, []);
+
+  const handleAddAll = () => {
+    items.forEach(item => {
+      addToCart({ ...item, qty: quantities[item.id] ?? item.qty });
+    });
+    setAddedAll(true);
+    setTimeout(() => setAddedAll(false), 2000);
+  };
 
   // Derived running total recomputed only when quantities change
   const total = useMemo(
@@ -138,15 +150,18 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
 
           <button
             type="button"
-            className="
-              bg-[#FF9900] text-white text-sm font-semibold
-              rounded-lg px-5 py-2
-              hover:bg-[#e88b00] active:scale-[0.97]
-              transition-all duration-150
+            onClick={handleAddAll}
+            className={`
+              text-sm font-semibold rounded-lg px-5 py-2
+              active:scale-[0.97] transition-all duration-150
               shadow-[0_2px_6px_rgba(255,153,0,0.3)]
-            "
+              ${addedAll
+                ? 'bg-green-500 text-white'
+                : 'bg-[#FF9900] text-white hover:bg-[#e88b00]'
+              }
+            `}
           >
-            Add all to cart
+            {addedAll ? '✓ Added to cart!' : 'Add all to cart'}
           </button>
         </div>
       </div>

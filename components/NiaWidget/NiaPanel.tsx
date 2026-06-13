@@ -7,8 +7,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import { useRouter, usePathname } from 'next/navigation';
 import { useNiaChatStore } from '@/lib/useNiaStore';
-import { routeQuery } from '@/lib/niaMockEngine';
 import type { NiaMessage } from '@/lib/useNiaStore';
 
 // Lazy-loaded card renderers
@@ -140,6 +140,8 @@ function TypingIndicator() {
 // ─── Main Panel Component ───────────────────────────────────────────────────
 
 export default function NiaPanel() {
+  const router = useRouter();
+  const pathname = usePathname();
   const {
     isOpen,
     close,
@@ -179,9 +181,9 @@ export default function NiaPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, initialQuery]);
 
-  // ── Core send handler ──
+  // ── Core send handler — calls real /api/nia backend ──
   const handleSend = useCallback(
-    (text?: string) => {
+    async (text?: string) => {
       const query = (text || input).trim();
       if (!query || isThinking) return;
 
@@ -196,26 +198,79 @@ export default function NiaPanel() {
       addMessage(userMsg);
       setInput('');
       setThinking(true);
+      
+      // Tell the product grid what the user is currently searching for
+      useNiaChatStore.getState().setActiveQuery(query);
+      
+      // Navigate to the dedicated search page
+      router.push(`/search?q=${encodeURIComponent(query)}`);
 
-      // Simulate AI processing delay (1.0–1.8 seconds)
-      const delay = 1000 + Math.random() * 800;
-      setTimeout(() => {
-        const response = routeQuery(query);
+      // Clear previous related products so the grid shows loading or clears
+      useNiaChatStore.getState().setRelatedProducts([]);
+
+      try {
+        // Get all current messages for context window
+        const currentMessages = [...useNiaChatStore.getState().messages, userMsg];
+
+        const res = await fetch('/api/nia', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: currentMessages,
+            userId: 'demo-user-001',
+            pincode: '110001',
+          }),
+        });
+
+        if (!res.ok) throw new Error(`API error ${res.status}`);
+        const niaResponse = await res.json();
+
         const niaMsg: NiaMessage = {
-          id: `nia-${Date.now()}`,
+          id: niaResponse.id || `nia-${Date.now()}`,
           role: 'nia',
-          content: response.content,
-          type: response.type,
-          data: response.data,
+          content: niaResponse.content,
+          type: niaResponse.type || 'text',
+          data: niaResponse.data || null,
           timestamp: new Date(),
         };
         addMessage(niaMsg);
+
+        // --- Auto-cart & Related Products Logic ---
+        if (niaMsg.data && Array.isArray(niaMsg.data) && niaMsg.data.length > 0) {
+          // Auto-add cart summary items to the live cart
+          if (niaMsg.type === 'cart_summary') {
+            const store = useNiaChatStore.getState();
+            niaMsg.data.forEach((item: any) => {
+               store.addToCart(item);
+            });
+          }
+          
+          // ALWAYS update the "Suggested" grid if the AI returns any product array
+          // Sometimes the LLM uses type 'text' but still includes the data, so we check data presence instead.
+          useNiaChatStore.getState().setRelatedProducts(niaMsg.data);
+        }
+
+        // Update quick chips from response if available
+        if (niaResponse.quickChips?.length) {
+          setQuickChips(niaResponse.quickChips);
+        }
+      } catch (err) {
+        console.error('Nia fetch error:', err);
+        addMessage({
+          id: `nia-err-${Date.now()}`,
+          role: 'nia',
+          content: "Hmm, something went wrong on my end. Try again in a second! 🙏",
+          type: 'text',
+          data: null,
+          timestamp: new Date(),
+        });
+      } finally {
         setThinking(false);
-        setQuickChips(response.quickChips);
-      }, delay);
+      }
     },
     [input, isThinking, addMessage, setThinking, setQuickChips]
   );
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -286,13 +341,13 @@ export default function NiaPanel() {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop (mobile only) */}
+          {/* Backdrop (mobile only - hidden on desktop so users can interact with the page) */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[998] sm:bg-black/10"
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[998] sm:hidden"
             onClick={close}
           />
 

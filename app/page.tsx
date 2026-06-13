@@ -1,16 +1,10 @@
-// app/page.tsx
-// Amazon Now + Nia landing page
-// Assembles all sections: TopBar → Hero → Emergency → Reorder → Rituals → Categories
-// This is the primary entry point users see at amazon.in/now
-//
-// Production extension notes at the bottom of this file
-
 import TopBar from "@/components/TopBar";
 import HeroSection from "@/components/HeroSection";
 import EmergencyBanner from "@/components/EmergencyBanner";
 import ReorderRow from "@/components/ReorderRow";
 import RitualRow from "@/components/RitualRow";
 import CategoryGrid from "@/components/CategoryGrid";
+import ProductBrowsePanel from "@/components/ProductBrowsePanel";
 
 export default function HomePage() {
   return (
@@ -24,6 +18,9 @@ export default function HomePage() {
 
         {/* Emergency CTA strip */}
         <EmergencyBanner />
+
+        {/* 🆕 Manual product browser + live cart */}
+        <ProductBrowsePanel />
 
         {/* AI-predicted reorder suggestions */}
         <ReorderRow />
