@@ -1,14 +1,15 @@
 // app/layout.tsx
 // Root layout for the Nia Amazon Now application
 // Wraps all pages with NiaProvider for global chat state
+// Renders the persistent Nia chat widget (trigger + panel) on every page
 // Production: add analytics, auth provider, error boundary
 
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import NiaProvider from "@/components/NiaProvider";
-import NiaChatPanel from "@/components/NiaChatPanel";
-import NiaFab from "@/components/NiaFab";
+import NiaPanel from "@/components/NiaWidget/NiaPanel";
+import NiaTrigger from "@/components/NiaWidget/NiaTrigger";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,8 +46,8 @@ export default function RootLayout({
         <NiaProvider>
           {children}
           {/* Persistent Nia floating widget — visible on all pages */}
-          <NiaChatPanel />
-          <NiaFab />
+          <NiaPanel />
+          <NiaTrigger />
         </NiaProvider>
       </body>
     </html>
