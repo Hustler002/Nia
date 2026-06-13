@@ -38,6 +38,7 @@ function getStatus(percent: number): StockStatus {
 }
 
 export async function getInventoryStatus(userId: string): Promise<LowStockItem[]> {
+  if (!supabase) return [];
   // Fetch last 30 orders for this user
   const { data: orders, error } = await supabase
     .from('orders')

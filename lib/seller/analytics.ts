@@ -1,6 +1,7 @@
 // lib/seller/analytics.ts
 // Server-side analytics helpers for the Seller Dashboard
 // All functions query Supabase and return clean data for Recharts
+// Gracefully returns empty data if Supabase is not configured.
 
 import { supabase } from '../supabaseClient';
 
@@ -25,6 +26,7 @@ export interface DemandByPincode {
 
 // Revenue grouped by day (last 30 days)
 export async function getRevenueByDay(): Promise<RevenueByDay[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from('orders')
     .select('placed_at, total')
@@ -44,6 +46,7 @@ export async function getRevenueByDay(): Promise<RevenueByDay[]> {
 
 // Top 8 products by units sold
 export async function getTopProducts(): Promise<TopProduct[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase.from('orders').select('items');
   if (error || !data) return [];
 
@@ -64,7 +67,7 @@ export async function getTopProducts(): Promise<TopProduct[]> {
 
 // Demand heatmap by delivery pincode
 export async function getDemandByPincode(): Promise<DemandByPincode[]> {
-  // Join orders → addresses to get pincode
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from('orders')
     .select('total, addresses(pincode)');
@@ -83,6 +86,8 @@ export async function getDemandByPincode(): Promise<DemandByPincode[]> {
 
 // Summary stats
 export async function getSummaryStats() {
+  if (!supabase) return { totalRevenue: 0, totalOrders: 0, todayOrders: 0, avgOrderValue: 0 };
+
   const { data: orders } = await supabase.from('orders').select('total, placed_at');
   if (!orders) return { totalRevenue: 0, totalOrders: 0, todayOrders: 0, avgOrderValue: 0 };
 

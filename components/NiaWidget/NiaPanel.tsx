@@ -10,6 +10,7 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 import { useNiaChatStore } from '@/lib/useNiaStore';
 import type { NiaMessage } from '@/lib/useNiaStore';
+import { useUser } from '@clerk/nextjs';
 
 // Lazy-loaded card renderers
 import CartSummaryCard from './cards/CartSummaryCard';
@@ -142,6 +143,7 @@ function TypingIndicator() {
 export default function NiaPanel() {
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useUser();
   const {
     isOpen,
     close,
@@ -217,7 +219,8 @@ export default function NiaPanel() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             messages: currentMessages,
-            userId: 'demo-user-001',
+            userId: user?.id ?? 'guest',
+            userName: user?.firstName ?? user?.fullName ?? 'Guest',
             pincode: '110001',
           }),
         });

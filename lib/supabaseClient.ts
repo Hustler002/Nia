@@ -1,17 +1,22 @@
 // lib/supabaseClient.ts
-// Singleton Supabase client — used in both server routes and client components
-// Server routes: import { supabaseAdmin } for service-role access
-// Client components: import { supabase } for anon-key access (RLS-protected)
+// Singleton Supabase client — used in server routes and client components
+// Returns null if env vars are missing or invalid — all callers must null-check
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
-// Client-side (anon key, row-level security applies)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Only create client if URL is a valid Supabase project URL
+const isValidSupabase =
+  supabaseUrl.startsWith('https://') && supabaseUrl.includes('.supabase.co');
 
-// ─── Database Types ──────────────────────────────────────────────────────────
+// Will be null if Supabase is not configured — all callers must null-check
+export const supabase: SupabaseClient | null = isValidSupabase
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
+
+// ─── Database Types ────────────────────────────────────────────────────────
 
 export interface DBUser {
   id: string;
@@ -24,7 +29,7 @@ export interface DBUser {
 export interface DBAddress {
   id: string;
   user_id: string;
-  label: string; // 'home', 'mom', 'office', etc.
+  label: string;
   full_address: string;
   pincode: string;
 }
@@ -48,6 +53,6 @@ export interface DBOrder {
 export interface DBMemory {
   id: string;
   user_id: string;
-  memory: string; // e.g. "User is allergic to peanuts"
+  memory: string;
   created_at: string;
 }

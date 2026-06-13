@@ -2,6 +2,7 @@
 // Persistent AI memory system using Supabase
 // extractMemories(): uses Groq to pull facts from conversation and save them
 // fetchMemoryContext(): returns a formatted string to inject into Nia's system prompt
+// All functions gracefully no-op if Supabase is not configured.
 
 import Groq from 'groq-sdk';
 import { supabase } from './supabaseClient';
@@ -17,10 +18,11 @@ export async function extractAndSaveMemories(
   userMessage: string,
   niaResponse: string
 ): Promise<void> {
+  if (!supabase) return; // Supabase not configured yet
   try {
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     const result = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.1-8b-instant',
       messages: [
         { role: 'system', content: MEMORY_EXTRACT_PROMPT },
         {
@@ -51,20 +53,45 @@ export async function extractAndSaveMemories(
 }
 
 export async function fetchMemoryContext(userId: string): Promise<string> {
-  const { data, error } = await supabase
+  if (!supabase) return '';
+
+  let context = '';
+
+  // 1. Fetch persistent extracted memories
+  const { data: memoriesData } = await supabase
     .from('ai_memories')
     .select('memory')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(20);
 
-  if (error || !data?.length) return '';
+  if (memoriesData && memoriesData.length > 0) {
+    const memories = memoriesData.map((d) => `- ${d.memory}`).join('\n');
+    context += `WHAT NIA KNOWS ABOUT THIS USER:\n${memories}\n\n`;
+  }
 
-  const memories = data.map((d) => `- ${d.memory}`).join('\n');
-  return `WHAT NIA KNOWS ABOUT THIS USER:\n${memories}`;
+  // 2. Fetch recent orders for real-time history
+  const { data: ordersData } = await supabase
+    .from('orders')
+    .select('id, items, total, placed_at')
+    .eq('user_id', userId)
+    .order('placed_at', { ascending: false })
+    .limit(5);
+
+  if (ordersData && ordersData.length > 0) {
+    const ordersStr = ordersData.map((o: any) => {
+      const itemNames = o.items.map((i: any) => `${i.qty}x ${i.name}`).join(', ');
+      return `- Order on ${new Date(o.placed_at).toLocaleDateString()}: ${itemNames} (Total: ₹${o.total})`;
+    }).join('\n');
+    context += `RECENT ORDER HISTORY:\n${ordersStr}\n`;
+  }
+
+  return context.trim();
 }
 
 export async function fetchUserAddresses(userId: string) {
+  if (!supabase) return [];
+
   const { data } = await supabase
     .from('addresses')
     .select('*')
@@ -73,6 +100,8 @@ export async function fetchUserAddresses(userId: string) {
 }
 
 export async function resolveAddress(userId: string, label: string) {
+  if (!supabase) return null;
+
   const { data } = await supabase
     .from('addresses')
     .select('*')

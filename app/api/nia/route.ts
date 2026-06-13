@@ -116,7 +116,7 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
 
 export async function POST(req: Request) {
   // 1. Parse and validate request body
-  const { messages, userId, pincode } = await req.json();
+  const { messages, userId, userName, pincode } = await req.json();
   const latestUserMessage = messages.filter((m: any) => m.role === 'user').at(-1)?.content ?? "";
   
   // 2. Mock-first: check demo flows
@@ -129,8 +129,8 @@ export async function POST(req: Request) {
   // 3. Fetch persistent AI memory for this user
   const memoryContext = userId ? await fetchMemoryContext(userId) : '';
   const systemPromptWithMemory = memoryContext
-    ? `${NIA_SYSTEM_PROMPT}\n\n${memoryContext}`
-    : NIA_SYSTEM_PROMPT;
+    ? `${NIA_SYSTEM_PROMPT}\n\nThe user's name is ${userName || 'Guest'}.\n\n${memoryContext}`
+    : `${NIA_SYSTEM_PROMPT}\n\nThe user's name is ${userName || 'Guest'}.`;
 
   // 4. Live Groq agent loop
   try {
@@ -144,7 +144,7 @@ export async function POST(req: Request) {
     
     // First call — tool selection
     const firstResponse = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "llama-3.1-8b-instant",
       messages: groqMessages,
       tools: TOOL_DEFINITIONS,
       tool_choice: "auto",
@@ -188,11 +188,11 @@ export async function POST(req: Request) {
       // ─────────────────────────────────────────────────────────────
 
       // Execute other mock tools normally
-      const toolResult = await executeMockTool(toolName, toolArgs);
+      const toolResult = await executeMockTool(toolName, toolArgs, userId, userName);
       
       // Second call — final response with tool result
       const secondResponse = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant",
         messages: [
           ...groqMessages,
           { role: "assistant", content: null, tool_calls: firstMessage.tool_calls },
@@ -264,10 +264,25 @@ function parseNiaResponse(raw: string): Partial<NiaMessage> {
         name: item.name,
         price: item.price,
         mrp: item.mrp || item.price,
-        image: item.imageUrl || '🛒',
+        image: item.imageUrl || item.image || '🛒',
         qty: 1,
         category: item.category || 'General',
       }));
+    }
+    // If data has an items key (from build_cart result object)
+    if (data && !Array.isArray(data) && Array.isArray(data.items)) {
+      data = data.items.map((item: any) => {
+        const p = item.product || item;
+        return {
+          id: p.id || String(Math.random()),
+          name: p.name || 'Unknown',
+          price: p.price || 0,
+          mrp: p.mrp || p.price || 0,
+          image: p.imageUrl || p.image || '🛒',
+          qty: item.quantity || item.qty || 1,
+          category: p.category || 'General',
+        };
+      });
     }
     
     return {

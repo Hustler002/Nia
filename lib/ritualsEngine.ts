@@ -39,6 +39,7 @@ const RITUAL_NAMES: Record<string, string> = {
 };
 
 export async function detectRituals(userId: string): Promise<Ritual[]> {
+  if (!supabase) return [];
   const { data: orders, error } = await supabase
     .from('orders')
     .select('*')

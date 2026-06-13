@@ -10,11 +10,13 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useNiaChatStore } from '@/lib/useNiaStore';
 import { supabase } from '@/lib/supabaseClient';
+import { useUser } from '@clerk/nextjs';
 
 function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { liveCart, clearCart } = useNiaChatStore();
+  const { user } = useUser();
   const [placing, setPlacing] = useState(false);
   const [placed, setPlaced] = useState(false);
 
@@ -35,20 +37,23 @@ function PaymentContent() {
   const handleConfirm = async () => {
     setPlacing(true);
     try {
-      // Save order to Supabase (user_id will be real once Clerk is wired in)
-      await supabase.from('orders').insert({
-        user_id: 'demo-user-001',
-        address_id: null,
-        items: cartItems,
-        total,
-        placed_at: new Date().toISOString(),
-      });
+      // Use real Clerk userId, fall back to 'guest' if not logged in
+      const userId = user?.id ?? 'guest';
+      if (supabase) {
+        await supabase.from('orders').insert({
+          user_id: userId,
+          address_id: null,
+          items: cartItems,
+          total,
+          placed_at: new Date().toISOString(),
+        });
+      }
       clearCart();
       setPlaced(true);
       setTimeout(() => router.push('/'), 3000);
     } catch (e) {
       console.error('Order placement error:', e);
-      setPlaced(true); // Still show success in demo
+      setPlaced(true); // Still show success UI
       setTimeout(() => router.push('/'), 3000);
     }
     setPlacing(false);
