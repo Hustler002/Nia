@@ -48,6 +48,14 @@ export default function TopBar() {
             📊 Seller
           </Link>
 
+          {/* Group Cart link */}
+          <Link
+            href="/social-cart"
+            className="hidden sm:flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-[#FF9900] transition-colors px-2 py-1 rounded-lg hover:bg-orange-50"
+          >
+            👥 Group Cart
+          </Link>
+
           {/* Nia button (mobile) */}
           <button
             onClick={toggleNia}
