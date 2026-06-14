@@ -100,6 +100,7 @@ interface NiaStoreState {
 
   // Live cart — shared between Nia AI cart and manual product browser
   liveCart: CartItem[];
+  isCartOpen: boolean;
 
   // Active product filter category for the browse panel
   browseCategory: string;
@@ -127,6 +128,8 @@ interface NiaStoreState {
   removeFromCart: (id: string) => void;
   updateQty: (id: string, qty: number) => void;
   clearCart: () => void;
+  openCart: () => void;
+  closeCart: () => void;
   setBrowseCategory: (cat: string) => void;
   setRelatedProducts: (items: CartItem[]) => void;
   setActiveQuery: (query: string) => void;
@@ -141,6 +144,7 @@ export const useNiaChatStore = create<NiaStoreState>((set) => ({
   comparisonPreview: null,
   initialQuery: '',
   liveCart: [],
+  isCartOpen: false,
   browseCategory: 'All',
   relatedProducts: [],
   activeQuery: '',
@@ -192,6 +196,8 @@ export const useNiaChatStore = create<NiaStoreState>((set) => ({
           : state.liveCart.map((i) => (i.id === id ? { ...i, qty } : i)),
     })),
   clearCart: () => set({ liveCart: [] }),
+  openCart: () => set({ isCartOpen: true }),
+  closeCart: () => set({ isCartOpen: false }),
   setBrowseCategory: (cat) => set({ browseCategory: cat }),
   setRelatedProducts: (items) => set({ relatedProducts: items }),
   setActiveQuery: (query) => set({ activeQuery: query }),

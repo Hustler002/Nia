@@ -1,271 +1,180 @@
 'use client';
 
-// app/seller/page.tsx — Full Seller Dashboard
-// Live charts + AI insights powered by Supabase + Groq
+import { useState } from 'react';
+import { intentGaps, IntentGap, gapTypeConfig, categoryColors, getIntentGapSummary } from '@/lib/seller/mockIntentGaps';
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell
-} from 'recharts';
+function IntentGapRow({ gap, isExpanded, onToggle }: { gap: IntentGap, isExpanded: boolean, onToggle: () => void }) {
+  const typeConfig = gapTypeConfig[gap.gapType];
+  const catColor = categoryColors[gap.category] || { bg: 'bg-gray-100', text: 'text-gray-700' };
 
-interface DashboardData {
-  stats: { totalRevenue: number; totalOrders: number; todayOrders: number; avgOrderValue: number };
-  topProducts: Array<{ name: string; image: string; units: number; revenue: number }>;
-  revenueByDay: Array<{ date: string; revenue: number; orders: number }>;
-  demandByPin: Array<{ pincode: string; orders: number; revenue: number }>;
-  insights: Array<{ title: string; body: string; type: 'opportunity' | 'warning' | 'info' }>;
-}
-
-const TEAL = '#00838F';
-const AMBER = '#FF9900';
-const CHART_COLORS = [TEAL, AMBER, '#26C6DA', '#FF7043', '#AB47BC', '#66BB6A', '#FFA726', '#42A5F5'];
-
-const insightStyles: Record<string, { bg: string; border: string; icon: string }> = {
-  opportunity: { bg: 'bg-green-50', border: 'border-green-200', icon: '🚀' },
-  warning: { bg: 'bg-amber-50', border: 'border-amber-200', icon: '⚠️' },
-  info: { bg: 'bg-blue-50', border: 'border-blue-200', icon: '💡' },
-};
-
-function StatCard({ label, value, sub, icon }: { label: string; value: string; sub?: string; icon: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm"
-    >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-2xl">{icon}</span>
-        <span className="text-xs font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-full">Last 30 days</span>
+    <div className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
+      <div
+        className="flex items-center px-6 py-4 cursor-pointer"
+        onClick={onToggle}
+      >
+        <div className="flex-1 min-w-0 pr-4">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-[15px] font-semibold text-[#0F1111] truncate">{gap.query}</h3>
+            {gap.trend === 'rising' && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-green-50 text-green-700">
+                ↑ {gap.trendDelta}%
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-medium ${catColor.bg} ${catColor.text}`}>
+              {gap.category}
+            </span>
+            <span className="text-[11px] text-gray-500 font-medium">
+              Avg max price: ₹{gap.avgMaxPrice}
+            </span>
+          </div>
+        </div>
+
+        <div className="w-32 text-right pr-4">
+          <p className="text-[15px] font-bold text-[#0F1111]">{gap.frequency}</p>
+          <p className="text-[11px] text-gray-400">Searches/wk</p>
+        </div>
+
+        <div className="w-32 hidden sm:block pr-4">
+          <span className={`inline-flex px-2 py-1 rounded-md text-xs font-semibold ${typeConfig.bg} ${typeConfig.text}`}>
+            {typeConfig.label}
+          </span>
+        </div>
+
+        <div className="w-8 flex justify-end">
+          <svg
+            className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </div>
-      <p className="text-3xl font-bold text-[#0F1111]">{value}</p>
-      <p className="text-sm text-gray-500 mt-1">{label}</p>
-      {sub && <p className="text-xs text-[#00838F] font-medium mt-1">{sub}</p>}
-    </motion.div>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden bg-gray-50"
+          >
+            <div className="px-6 py-5 border-t border-gray-100 flex flex-col md:flex-row gap-6">
+              {/* Left col: details */}
+              <div className="flex-1 space-y-4">
+                <div>
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Closest Existing Listing</h4>
+                  {gap.closestExistingProduct ? (
+                    <div className="bg-white border border-gray-200 rounded-lg p-3 flex justify-between items-center">
+                      <span className="text-sm font-medium text-[#0F1111]">{gap.closestExistingProduct.name}</span>
+                      <span className="text-xs font-bold text-[#00838F] bg-[#E0F2F1] px-2 py-1 rounded">
+                        {gap.closestExistingProduct.matchScore}% Match
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500 italic">None found in your catalog.</div>
+                  )}
+                </div>
+                
+                <div>
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Location Hotspots</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {gap.locationBreakdown.map((loc, i) => (
+                      <span key={i} className="text-xs bg-white border border-gray-200 text-gray-600 px-2 py-1 rounded-md">
+                        {loc.area} <span className="font-semibold text-gray-900 ml-1">{loc.percentage}%</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right col: Action & Recommendations */}
+              <div className="w-full md:w-72 space-y-4">
+                <div>
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Nia's Recommendations</h4>
+                  <ul className="space-y-1">
+                    {gap.recommendedAttributes.map((rec, i) => (
+                      <li key={i} className="text-xs text-gray-700 flex items-start gap-1.5">
+                        <span className="text-[#00838F] mt-0.5">•</span>
+                        <span className="leading-relaxed">{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <Link
+                  href={`/seller/optimization?query=${encodeURIComponent(gap.query)}`}
+                  className={`block w-full text-center py-2 px-4 rounded-lg text-sm font-bold text-white transition-colors shadow-sm ${typeConfig.actionColor}`}
+                >
+                  {typeConfig.action}
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
-export default function SellerDashboard() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'locations' | 'ai'>('overview');
-
-  useEffect(() => {
-    fetch('/seller/api/insights')
-      .then((r) => r.json())
-      .then((d) => { setData(d); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4">
-        <div className="w-12 h-12 rounded-full border-4 border-[#00838F] border-t-transparent animate-spin" />
-        <p className="text-gray-500 text-sm">Loading your analytics...</p>
-      </div>
-    );
-  }
-
-  if (!data) return <div className="p-8 text-red-500">Failed to load dashboard data.</div>;
-
-  const { stats, topProducts, revenueByDay, demandByPin, insights } = data;
-
-  const tabs = [
-    { id: 'overview', label: '📊 Overview' },
-    { id: 'products', label: '📦 Products' },
-    { id: 'locations', label: '📍 Locations' },
-    { id: 'ai', label: '🤖 AI Insights' },
-  ] as const;
+export default function IntentGapsPage() {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const summary = getIntentGapSummary();
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Page Header */}
-      <div className="bg-white border-b border-gray-100 px-6 py-5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-[#0F1111]">Seller Dashboard</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Powered by Nia Analytics × Groq AI</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs text-gray-500 font-medium">Live</span>
-          </div>
+    <div className="min-h-screen bg-gray-50 pb-16">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-6">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-2xl font-bold text-[#0F1111] flex items-center gap-2">
+            Intent Gaps <span className="text-xl">🎯</span>
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Discover what customers are searching for, but cannot find.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon="💰" label="Total Revenue" value={`₹${stats.totalRevenue.toLocaleString()}`} />
-          <StatCard icon="📦" label="Total Orders" value={stats.totalOrders.toString()} />
-          <StatCard icon="⚡" label="Orders Today" value={stats.todayOrders.toString()} sub="Amazon Now speed" />
-          <StatCard icon="🧾" label="Avg Order Value" value={`₹${stats.avgOrderValue}`} />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Total Unmet Searches</p>
+            <p className="text-2xl font-bold text-[#0F1111]">{summary.totalUnmet.toLocaleString()}</p>
+            <p className="text-xs text-green-600 font-medium mt-1">↑ {summary.weekOverWeekChange}% vs last week</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Gaps in Your Category</p>
+            <p className="text-2xl font-bold text-[#0F1111]">{summary.matchingGaps}</p>
+            <p className="text-xs text-gray-500 font-medium mt-1">in {summary.sellerCategory}</p>
+          </div>
+          <div className="bg-gradient-to-br from-[#E0F2F1] to-white rounded-xl border border-[#00838F]/20 p-5 shadow-sm">
+            <p className="text-xs text-[#00838F] font-semibold uppercase tracking-wider mb-1">Potential Missed Revenue</p>
+            <p className="text-2xl font-bold text-[#00838F]">{summary.potentialRevenue}</p>
+            <p className="text-xs text-[#00838F]/70 font-medium mt-1">estimated per week</p>
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                activeTab === tab.id
-                  ? 'bg-[#00838F] text-white shadow-md'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-[#00838F] hover:text-[#00838F]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Table/List */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center">
+            <h2 className="text-sm font-bold text-[#0F1111]">Top Intent Gaps ({intentGaps.length})</h2>
+          </div>
+          <div className="flex flex-col">
+            {intentGaps.map(gap => (
+              <IntentGapRow
+                key={gap.id}
+                gap={gap}
+                isExpanded={expandedId === gap.id}
+                onToggle={() => setExpandedId(expandedId === gap.id ? null : gap.id)}
+              />
+            ))}
+          </div>
         </div>
-
-        {/* OVERVIEW TAB */}
-        {activeTab === 'overview' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-              <h2 className="font-semibold text-[#0F1111] mb-4">Revenue Over Time</h2>
-              {revenueByDay.length > 0 ? (
-                <ResponsiveContainer width="100%" height={220}>
-                  <LineChart data={revenueByDay}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(d) => d.slice(5)} />
-                    <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${v}`} />
-                    <Tooltip formatter={(v: any) => [`₹${v}`, 'Revenue']} />
-                    <Line type="monotone" dataKey="revenue" stroke={TEAL} strokeWidth={2.5} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-48 flex items-center justify-center text-gray-400 text-sm">
-                  No orders yet. Place some orders to see the chart!
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-        {/* PRODUCTS TAB */}
-        {activeTab === 'products' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-              <h2 className="font-semibold text-[#0F1111] mb-4">Top Products by Units Sold</h2>
-              {topProducts.length > 0 ? (
-                <>
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={topProducts} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
-                      <XAxis type="number" tick={{ fontSize: 11 }} />
-                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={100} />
-                      <Tooltip formatter={(v: any) => [`${v} units`, 'Sold']} />
-                      <Bar dataKey="units" radius={[0, 4, 4, 0]}>
-                        {topProducts.map((_, i) => (
-                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                  {/* Table below chart */}
-                  <div className="mt-4 space-y-2">
-                    {topProducts.map((p, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
-                        <span className="text-xl w-8 text-center">{p.image}</span>
-                        <div className="flex-1">
-                          <p className="font-medium text-sm text-[#0F1111]">{p.name}</p>
-                          <p className="text-xs text-gray-400">{p.units} units sold</p>
-                        </div>
-                        <p className="font-semibold text-sm text-[#00838F]">₹{p.revenue.toLocaleString()}</p>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="h-48 flex items-center justify-center text-gray-400 text-sm">No product data yet.</div>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-        {/* LOCATIONS TAB */}
-        {activeTab === 'locations' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-              <h2 className="font-semibold text-[#0F1111] mb-1">Demand by Pincode</h2>
-              <p className="text-xs text-gray-400 mb-4">Areas with highest order volume — consider stocking nearby dark stores</p>
-              {demandByPin.length > 0 ? (
-                <div className="space-y-3">
-                  {demandByPin.map((pin, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#E0F2F1] flex items-center justify-center text-[#00838F] font-bold text-xs flex-shrink-0">
-                        {i + 1}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between mb-1">
-                          <span className="text-sm font-medium text-[#0F1111]">📍 {pin.pincode}</span>
-                          <span className="text-xs text-gray-500">{pin.orders} orders · ₹{pin.revenue}</span>
-                        </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-[#00838F] rounded-full transition-all"
-                            style={{ width: `${Math.min((pin.orders / (demandByPin[0]?.orders || 1)) * 100, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="h-48 flex items-center justify-center text-gray-400 text-sm">No location data yet.</div>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-        {/* AI INSIGHTS TAB */}
-        {activeTab === 'ai' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl">🤖</span>
-                <div>
-                  <h2 className="font-semibold text-[#0F1111]">AI-Generated Insights</h2>
-                  <p className="text-xs text-gray-400">Powered by Groq × Llama 3.3 — refreshed on every load</p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {insights.map((insight, i) => {
-                  const style = insightStyles[insight.type] || insightStyles.info;
-                  return (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className={`${style.bg} border ${style.border} rounded-2xl p-4`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="text-xl flex-shrink-0">{style.icon}</span>
-                        <div>
-                          <p className="font-semibold text-[#0F1111] text-sm">{insight.title}</p>
-                          <p className="text-gray-600 text-sm mt-0.5 leading-relaxed">{insight.body}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Quick actions for seller */}
-            <div className="bg-gradient-to-r from-[#00838F] to-[#26C6DA] rounded-2xl p-5 text-white">
-              <h3 className="font-bold text-lg mb-1">Ready to act on these insights?</h3>
-              <p className="text-white/80 text-sm mb-4">Nia can help you draft promotions, restock alerts, and more.</p>
-              <button className="bg-white text-[#00838F] font-semibold text-sm px-4 py-2 rounded-full hover:bg-white/90 transition-colors">
-                Ask Nia →
-              </button>
-            </div>
-          </motion.div>
-        )}
       </div>
     </div>
   );

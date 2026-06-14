@@ -138,7 +138,7 @@ export default function EmergencyPage() {
                           category: selectedCategory.name,
                         });
                       });
-                      router.push('/payment');
+                      useNiaChatStore.getState().openCart();
                     }}
                     className="bg-orange-500 hover:bg-orange-600 text-white text-lg font-bold py-4 md:px-12 rounded-xl shadow-lg shadow-orange-500/30 transition-all transform hover:-translate-y-1"
                   >

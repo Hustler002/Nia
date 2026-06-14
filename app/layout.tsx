@@ -10,6 +10,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import NiaProvider from "@/components/NiaProvider";
 import NiaPanel from "@/components/NiaWidget/NiaPanel";
 import NiaTrigger from "@/components/NiaWidget/NiaTrigger";
+import MiniCart from "@/components/MiniCart";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,6 +50,7 @@ export default function RootLayout({
             {/* Persistent Nia floating widget — visible on all pages */}
             <NiaPanel />
             <NiaTrigger />
+            <MiniCart />
           </NiaProvider>
         </body>
       </html>
