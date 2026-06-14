@@ -25,6 +25,8 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
         { id: '5', name: "Cornitos Nacho", price: 40, mrp: 45, image: '🌮', qty: 1, category: 'Snacks' },
         { id: '6', name: "Oreo", price: 40, mrp: 45, image: '🍪', qty: 1, category: 'Snacks' }
       ],
+      confidence: 94,
+      reason: 'Top-rated snacks + beverages combo, most ordered for movie nights in your area.',
       timestamp: new Date()
     } as any;
   }
@@ -46,6 +48,8 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
         ],
         attributes: []
       },
+      confidence: 91,
+      reason: 'boAt wins on bass + value; JBL wins on brand trust; Noise is budget pick.',
       timestamp: new Date()
     } as any;
   }
@@ -73,6 +77,8 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
         totalPrice: emergencyCategory.kit.reduce((sum, item) => sum + item.price * item.qty, 0),
         eta: '~10 min'
       },
+      confidence: 97,
+      reason: 'Fastest-available essentials from nearest dark store.',
       timestamp: new Date()
     } as any;
   }
@@ -93,6 +99,8 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
         { id: '6', name: "Oreo", price: 40, mrp: 45, image: '🍪', qty: 3, category: 'Snacks' },
         { id: '7', name: "Cornitos", price: 40, mrp: 45, image: '🌮', qty: 2, category: 'Snacks' }
       ],
+      confidence: 92,
+      reason: 'Kid-friendly snacks + beverages bundle — most popular party picks in your area.',
       timestamp: new Date()
     } as any;
   }
@@ -107,6 +115,8 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
       data: {
         product: { id: 'rn-001', name: 'Amul Milk & Colgate Toothpaste', price: 200, image: '🥛', lastOrdered: '3 days ago', cycleDays: 3, percentUsed: 95 }
       },
+      confidence: 88,
+      reason: 'Based on your order history: milk every 3 days, toothpaste every 38 days.',
       timestamp: new Date()
     } as any;
   }
@@ -159,7 +169,6 @@ export async function POST(req: Request) {
       const toolCall = firstMessage.tool_calls[0];
       const toolName = toolCall.function.name;
       const toolArgs = JSON.parse(toolCall.function.arguments);
-
       // ─── Handle checkout_direct autonomously ──────────────────────
       if (toolName === 'checkout_direct') {
         const { item_query, address_label, quantity = 1 } = toolArgs;
@@ -186,6 +195,17 @@ export async function POST(req: Request) {
         });
       }
       // ─────────────────────────────────────────────────────────────
+
+      // Inject user context into tool args where relevant
+      if (toolName === 'get_user_profile' && !toolArgs.user_id) {
+        toolArgs.user_id = userId || 'demo-user-001';
+      }
+      if (toolName === 'check_inventory_eta' && !toolArgs.pincode) {
+        toolArgs.pincode = pincode || '110001';
+      }
+      if (toolName === 'generate_emergency_kit' && !toolArgs.pincode) {
+        toolArgs.pincode = pincode || '110001';
+      }
 
       // Execute other mock tools normally
       const toolResult = await executeMockTool(toolName, toolArgs, userId, userName);
@@ -255,6 +275,10 @@ function parseNiaResponse(raw: string): Partial<NiaMessage> {
         image: item.imageUrl || item.image || '🛒',
         qty: item.qty || item.quantity || 1,
         category: item.category || 'General',
+        rating: item.rating || undefined,
+        eta: item.eta_minutes || item.eta || undefined,
+        matchReason: item.matchReason || undefined,
+        brand: item.brand || undefined,
       }));
     }
     // If data has a products key (from search_catalog result object)
@@ -267,6 +291,10 @@ function parseNiaResponse(raw: string): Partial<NiaMessage> {
         image: item.imageUrl || item.image || '🛒',
         qty: 1,
         category: item.category || 'General',
+        rating: item.rating || undefined,
+        eta: item.eta_minutes || item.eta || undefined,
+        matchReason: item.matchReason || undefined,
+        brand: item.brand || undefined,
       }));
     }
     // If data has an items key (from build_cart result object)

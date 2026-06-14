@@ -445,9 +445,14 @@ export function routeQuery(query: string): MockResponse {
 
 /**
  * Returns the proactive nudge message shown on first page load.
+ * Now powered by the consumption engine — computes real predictions from
+ * order history and returns the most urgent nudge.
  * In production, this comes from Amazon Personalize's consumption-cycle predictions.
  */
 export function getProactiveNudge(): NiaMessage {
+  // Import is done lazily here to avoid circular deps in the mock engine.
+  // The NiaProvider now uses the consumption engine directly instead of this
+  // function, but we keep it for backward compatibility.
   return {
     id: 'proactive-001',
     role: 'nia',
