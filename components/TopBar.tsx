@@ -1,17 +1,37 @@
 // components/TopBar.tsx
+<<<<<<< HEAD
 // Sticky top navigation bar — Amazon Navy design
 // Uses Clerk UserButton for live auth state + live cart count
+=======
+// Sticky top navigation bar for Amazon Now + Nia
+// Reads live data from useCartStore, useUserStore, useNiaChatStore
+>>>>>>> main
 
 'use client';
 
-import { useNiaStore, useNiaChatStore } from '@/lib/useNiaStore';
+import { useState } from 'react';
+import { useNiaChatStore } from '@/lib/useNiaStore';
+import { useCartStore } from '@/lib/stores/useCartStore';
+import { useUserStore } from '@/lib/stores/useUserStore';
 import { UserButton, SignInButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 
 export default function TopBar() {
-  const { toggleNia } = useNiaStore();
-  const { liveCart } = useNiaChatStore();
+  const { open: openNia } = useNiaChatStore();
+  const openCart = useCartStore((s) => s.openCart);
+  const cartTotalItems = useCartStore((s) => s.getTotalItems());
+  const { user: niaUser, pincode } = useUserStore();
   const { isSignedIn } = useUser();
+  const [editingPincode, setEditingPincode] = useState(false);
+  const [pincodeInput, setPincodeInput] = useState(pincode);
+  const setPincode = useUserStore((s) => s.setPincode);
+
+  const handlePincodeUpdate = () => {
+    if (pincodeInput.trim().length >= 5) {
+      setPincode(pincodeInput.trim());
+    }
+    setEditingPincode(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-[#232F3E] shadow-md">
@@ -32,7 +52,25 @@ export default function TopBar() {
           </svg>
           <div className="leading-tight">
             <p className="text-[11px] text-white/60">Deliver to</p>
-            <p className="text-sm font-bold text-white">New Delhi 110001</p>
+            {editingPincode ? (
+              <input
+                type="text"
+                value={pincodeInput}
+                onChange={(e) => setPincodeInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handlePincodeUpdate()}
+                onBlur={handlePincodeUpdate}
+                className="w-16 text-sm font-bold bg-transparent border-b border-white text-white focus:outline-none"
+                maxLength={6}
+                autoFocus
+              />
+            ) : (
+              <button
+                onClick={() => { setEditingPincode(true); setPincodeInput(pincode); }}
+                className="text-sm font-bold text-white hover:text-white/80 transition-colors"
+              >
+                {pincode}
+              </button>
+            )}
           </div>
         </div>
 
@@ -52,9 +90,17 @@ export default function TopBar() {
             Seller Central
           </Link>
 
+          {/* Group Cart link */}
+          <Link
+            href="/social-cart"
+            className="hidden sm:flex items-center gap-1 text-xs font-bold text-white/80 hover:text-white hover:underline transition-colors px-2 py-1"
+          >
+            👥 Group Cart
+          </Link>
+
           {/* Nia button (mobile) — keeps teal (Nia branding exception) */}
           <button
-            onClick={toggleNia}
+            onClick={() => openNia()}
             className="sm:hidden w-9 h-9 rounded-full bg-[#00838F] flex items-center justify-center shadow-md"
             aria-label="Open Nia assistant"
           >
@@ -73,16 +119,20 @@ export default function TopBar() {
           )}
 
           {/* Cart with live count */}
-          <Link href="/payment" className="relative p-1.5 hover:outline hover:outline-1 hover:outline-white/40 rounded-sm transition-all" aria-label="Cart">
+          <button
+            onClick={openCart}
+            className="relative p-1.5 hover:outline hover:outline-1 hover:outline-white/40 rounded-sm transition-all"
+            aria-label="Cart"
+          >
             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
             </svg>
-            {liveCart.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[#FF9900] text-white text-xs font-bold rounded-full flex items-center justify-center">
-                {liveCart.reduce((sum, i) => sum + i.qty, 0)}
+            {cartTotalItems > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[#FF9900] text-white text-xs font-bold rounded-full flex items-center justify-center animate-[scale-in_0.2s_ease-out]">
+                {cartTotalItems}
               </span>
             )}
-          </Link>
+          </button>
         </div>
       </div>
     </header>

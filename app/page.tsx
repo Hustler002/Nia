@@ -1,3 +1,4 @@
+import Link from "next/link";
 import TopBar from "@/components/TopBar";
 import HeroSection from "@/components/HeroSection";
 import EmergencyBanner from "@/components/EmergencyBanner";
@@ -19,6 +20,27 @@ export default function HomePage() {
 
         {/* Emergency CTA strip */}
         <EmergencyBanner />
+
+        {/* 👥 Social / Group Cart CTA */}
+        <section className="max-w-7xl mx-auto px-4 py-4">
+          <Link
+            href="/social-cart"
+            className="group flex items-center gap-4 w-full rounded-2xl bg-gradient-to-r from-[#00838F] to-[#006d75] p-4 hover:from-[#006d75] hover:to-[#005a5f] transition-all shadow-md shadow-[#00838F]/10 hover:shadow-lg hover:shadow-[#00838F]/20"
+          >
+            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+              <span className="text-2xl">👥</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-white">Group Cart — Shop Together in Real-Time</p>
+              <p className="text-xs text-white/70 mt-0.5">Share a link. Friends add items. Nia keeps everyone safe. One cart, one checkout.</p>
+            </div>
+            <div className="shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
+        </section>
 
         {/* 🆕 Manual product browser + live cart */}
         <ProductBrowsePanel />

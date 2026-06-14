@@ -8,14 +8,16 @@ import { Suspense, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useNiaChatStore } from '@/lib/useNiaStore';
+import { useCartStore } from '@/lib/stores/useCartStore';
+import { useUserStore } from '@/lib/stores/useUserStore';
 import { supabase } from '@/lib/supabaseClient';
-import { useUser } from '@clerk/nextjs';
 
 function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { liveCart, clearCart } = useNiaChatStore();
-  const { user } = useUser();
+  const { liveCart, clearCart: clearNiaCart } = useNiaChatStore();
+  const { items: cartItems2, clearCart: clearCartStore } = useCartStore();
+  const user = useUserStore((s) => s.user);
   const [placing, setPlacing] = useState(false);
   const [placed, setPlaced] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,9 @@ function PaymentContent() {
   const addressLabel = searchParams.get('address') || 'Home';
   const directItemName = searchParams.get('item');
 
-  const cartItems = liveCart.length > 0
+  const cartItems = cartItems2.length > 0
+    ? cartItems2
+    : liveCart.length > 0
     ? liveCart
     : directItemName
     ? [{ id: 'direct-1', name: directItemName, price: 89, mrp: 99, image: '📦', qty: 1, category: 'Other' }]
@@ -38,7 +42,7 @@ function PaymentContent() {
     setPlacing(true);
     try {
       // Use real Clerk userId, fall back to 'guest' if not logged in
-      const userId = user?.id ?? 'guest';
+      const userId = user?.id ?? 'priya-sharma-001';
       if (supabase) {
         await supabase.from('orders').insert({
           user_id: userId,
@@ -48,7 +52,8 @@ function PaymentContent() {
           placed_at: new Date().toISOString(),
         });
       }
-      clearCart();
+      clearNiaCart();
+      clearCartStore();
       setPlaced(true);
       setTimeout(() => router.push('/'), 3000);
     } catch (e) {

@@ -1,16 +1,35 @@
 // components/HeroSection.tsx
 // Main hero with the Nia conversational input bar
 // Amazon-style search bar: rigid rectangle, flush search button on right
-// Production: submit fires a Bedrock Agent invocation via API route
+// Uses useNiaChatStore (Zustand) for all Nia interactions
 
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useNiaStore } from '@/lib/useNiaStore';
-import { heroPlaceholders, quickStartChips } from '@/lib/mockData';
+import { useRouter } from 'next/navigation';
+import { useNiaChatStore } from '@/lib/useNiaStore';
+import { useUserStore } from '@/lib/stores/useUserStore';
+
+const heroPlaceholders = [
+  '"Movie night for 4 under ₹500"',
+  '"Best earbuds under ₹2000"',
+  '"I have a fever — need medicine fast"',
+  '"Weekly groceries for 2 under ₹1500"',
+  '"Birthday party for 10 kids"',
+];
+
+const quickStartChips = [
+  { label: '🎬 Movie night', query: 'Movie night for 4 under ₹500' },
+  { label: '🎂 Party kit', query: 'Birthday party for 10 kids' },
+  { label: '🚨 Emergency', href: '/emergency' },
+  { label: '🍳 Sunday brunch', query: 'Sunday brunch essentials for family' },
+  { label: '💪 Gym fuel', query: 'Post-workout protein snacks under ₹300' },
+];
 
 export default function HeroSection() {
-  const { openNia } = useNiaStore();
+  const router = useRouter();
+  const { open: openNia, sendMessage } = useNiaChatStore();
+  const { user } = useUserStore();
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [isFading, setIsFading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -32,7 +51,19 @@ export default function HeroSection() {
     e.preventDefault();
     if (inputValue.trim()) {
       openNia(inputValue.trim());
+      sendMessage(inputValue.trim(), user?.id, user?.pincode);
       setInputValue('');
+    }
+  };
+
+  const handleChipClick = (chip: typeof quickStartChips[0]) => {
+    if (chip.href) {
+      router.push(chip.href);
+      return;
+    }
+    if (chip.query) {
+      openNia(chip.query);
+      sendMessage(chip.query, user?.id, user?.pincode);
     }
   };
 
@@ -46,6 +77,15 @@ export default function HeroSection() {
   return (
     <section className="relative py-6 sm:py-10 px-4 overflow-hidden bg-gradient-to-b from-[#232F3E] via-[#37475A] to-[#EAEDED]">
       <div className="relative max-w-2xl mx-auto text-center">
+        {/* Greeting */}
+        {user && (
+          <div className="mb-2">
+            <span className="text-sm text-gray-400">
+              Hi {user.name.split(' ')[0]}! 👋
+            </span>
+          </div>
+        )}
+
         {/* Headline */}
         <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 tracking-tight">
           Tell <span className="text-[#00838F]">Nia</span> what you need.
@@ -94,7 +134,7 @@ export default function HeroSection() {
               </svg>
             </button>
 
-            {/* Search button — Amazon orange, flush right */}
+            {/* Submit button — Amazon orange, flush right */}
             <button
               type="submit"
               className="flex-shrink-0 w-12 bg-[#FEBD69] hover:bg-[#F3A847] flex items-center justify-center rounded-r-sm transition-colors"
@@ -112,7 +152,7 @@ export default function HeroSection() {
           {quickStartChips.map((chip) => (
             <button
               key={chip.label}
-              onClick={() => openNia(chip.query)}
+              onClick={() => handleChipClick(chip)}
               className="px-3 py-1.5 rounded-sm bg-white border border-[#D5D9D9] text-xs font-medium text-[#0F1111] hover:bg-[#F7FAFA] hover:border-[#007185] hover:text-[#007185] shadow-sm transition-all duration-150"
             >
               {chip.label}

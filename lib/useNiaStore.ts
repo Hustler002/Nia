@@ -1,81 +1,17 @@
 // lib/useNiaStore.ts
-// Global state for the Nia chat widget using Zustand
-// Manages: open/close, messages, typing state, cart preview, comparison data, proactive nudges
-// Production: add WebSocket connection state, streaming message support, session persistence
+// Canonical Zustand store for the Nia chat widget
+// Manages: open/close, messages, typing state, proactive nudges, API calls
+// All types imported from @/types
 
 'use client';
 
-import { createContext, useContext } from 'react';
 import { create } from 'zustand';
+import type { CartItem, ComparisonData, EmergencyKit, ReorderNudge, NiaMessage, NiaMessageType } from '@/types';
+import { useCartStore } from '@/lib/stores/useCartStore';
+import { useToastStore } from '@/lib/stores/useToastStore';
 
-// ─── Type Definitions ───────────────────────────────────────────────────────
-
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  mrp: number;
-  image: string; // emoji for demo, URL in production
-  qty: number;
-  category: string;
-}
-
-export interface ComparisonProduct {
-  id: string;
-  name: string;
-  price: number;
-  rating: number;
-  image: string;
-  specs: Record<string, string>;
-  matchScore: number;
-  recommended: boolean;
-  whyRecommended?: string;
-}
-
-export interface ComparisonData {
-  query: string;
-  products: ComparisonProduct[];
-  attributes: string[];
-}
-
-export interface EmergencyKit {
-  category: string;
-  name: string;
-  items: CartItem[];
-  totalPrice: number;
-  eta: string;
-}
-
-export interface ReorderNudge {
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    image: string;
-    lastOrdered: string;
-    cycleDays: number;
-    percentUsed: number;
-  };
-}
-
-// Message types map to specific rich card renderers
-export type NiaMessageType =
-  | 'text'
-  | 'product_list'
-  | 'comparison'
-  | 'cart_summary'
-  | 'emergency_kit'
-  | 'reorder_nudge'
-  | 'direct_checkout';
-
-export interface NiaMessage {
-  id: string;
-  role: 'user' | 'nia';
-  content: string;
-  type: NiaMessageType;
-  data?: CartItem[] | ComparisonData | EmergencyKit | ReorderNudge | null;
-  timestamp: Date;
-}
+// Re-export types for backward compatibility
+export type { CartItem, ComparisonData, EmergencyKit, ReorderNudge, NiaMessage, NiaMessageType };
 
 // ─── Zustand Store ──────────────────────────────────────────────────────────
 
@@ -100,6 +36,7 @@ interface NiaStoreState {
 
   // Live cart — shared between Nia AI cart and manual product browser
   liveCart: CartItem[];
+  isCartOpen: boolean;
 
   // Active product filter category for the browse panel
   browseCategory: string;
@@ -122,17 +59,22 @@ interface NiaStoreState {
   setHasProactiveNudge: (val: boolean) => void;
   clearMessages: () => void;
 
-  // Live cart actions
+  // Live cart actions (kept for backward compat with card components)
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string) => void;
   updateQty: (id: string, qty: number) => void;
   clearCart: () => void;
+  openCart: () => void;
+  closeCart: () => void;
   setBrowseCategory: (cat: string) => void;
   setRelatedProducts: (items: CartItem[]) => void;
   setActiveQuery: (query: string) => void;
+
+  // API call action
+  sendMessage: (text: string, userId?: string, pincode?: string) => Promise<void>;
 }
 
-export const useNiaChatStore = create<NiaStoreState>((set) => ({
+export const useNiaChatStore = create<NiaStoreState>((set, get) => ({
   isOpen: false,
   isThinking: false,
   hasProactiveNudge: false,
@@ -141,6 +83,7 @@ export const useNiaChatStore = create<NiaStoreState>((set) => ({
   comparisonPreview: null,
   initialQuery: '',
   liveCart: [],
+  isCartOpen: false,
   browseCategory: 'All',
   relatedProducts: [],
   activeQuery: '',
@@ -169,8 +112,13 @@ export const useNiaChatStore = create<NiaStoreState>((set) => ({
   clearMessages: () =>
     set({ messages: [], cartPreview: null, comparisonPreview: null }),
 
-  // Cart actions — add merges with existing (increments qty if present)
-  addToCart: (item) =>
+  // Cart actions — bridge to the dedicated cart store + keep local liveCart in sync
+  addToCart: (item) => {
+    // Add to the dedicated cart store
+    useCartStore.getState().addItem(item);
+    // Fire toast
+    useToastStore.getState().addToast(`${item.name} added to cart · ₹${item.price * (item.qty || 1)}`);
+    // Also update local liveCart for backward compat
     set((state) => {
       const existing = state.liveCart.find((i) => i.id === item.id);
       if (existing) {
@@ -181,7 +129,8 @@ export const useNiaChatStore = create<NiaStoreState>((set) => ({
         };
       }
       return { liveCart: [...state.liveCart, { ...item, qty: item.qty || 1 }] };
-    }),
+    });
+  },
   removeFromCart: (id) =>
     set((state) => ({ liveCart: state.liveCart.filter((i) => i.id !== id) })),
   updateQty: (id, qty) =>
@@ -192,34 +141,98 @@ export const useNiaChatStore = create<NiaStoreState>((set) => ({
           : state.liveCart.map((i) => (i.id === id ? { ...i, qty } : i)),
     })),
   clearCart: () => set({ liveCart: [] }),
+  openCart: () => set({ isCartOpen: true }),
+  closeCart: () => set({ isCartOpen: false }),
   setBrowseCategory: (cat) => set({ browseCategory: cat }),
   setRelatedProducts: (items) => set({ relatedProducts: items }),
   setActiveQuery: (query) => set({ activeQuery: query }),
+
+  // ── Core send message handler — calls /api/nia ──
+  sendMessage: async (text: string, userId?: string, pincode?: string) => {
+    const query = text.trim();
+    if (!query || get().isThinking) return;
+
+    const userMsg: NiaMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: query,
+      type: 'text',
+      timestamp: new Date(),
+    };
+
+    const currentMessages = [...get().messages, userMsg];
+    set((state) => ({
+      messages: [...state.messages, userMsg],
+      isThinking: true,
+      activeQuery: query,
+    }));
+
+    try {
+      const res = await fetch('/api/nia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: currentMessages,
+          userId: userId || 'priya-sharma-001',
+          pincode: pincode || '110001',
+        }),
+      });
+
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      const niaResponse = await res.json();
+
+      const niaMsg: NiaMessage = {
+        id: niaResponse.id || `nia-${Date.now()}`,
+        role: 'nia',
+        content: niaResponse.content || niaResponse.message || '',
+        type: niaResponse.type || 'text',
+        data: niaResponse.data || null,
+        confidence: niaResponse.confidence,
+        reason: niaResponse.reason,
+        timestamp: new Date(),
+      };
+
+      set((state) => ({
+        messages: [...state.messages, niaMsg],
+        isThinking: false,
+      }));
+
+      // Auto-add to cart for cart_summary responses
+      if (niaMsg.data && Array.isArray(niaMsg.data) && niaMsg.type === 'cart_summary') {
+        niaMsg.data.forEach((item: CartItem) => {
+          get().addToCart(item);
+        });
+      }
+
+      // Update related products for browse panel
+      if (niaMsg.data && Array.isArray(niaMsg.data)) {
+        set({ relatedProducts: niaMsg.data });
+      }
+
+      // Update quick chips if provided
+      if (niaResponse.quickChips?.length) {
+        set({ quickChips: niaResponse.quickChips });
+      }
+    } catch (err) {
+      console.error('Nia fetch error:', err);
+      set((state) => ({
+        messages: [
+          ...state.messages,
+          {
+            id: `nia-err-${Date.now()}`,
+            role: 'nia' as const,
+            content: "Hmm, something went wrong on my end. Try again in a second! 🙏",
+            type: 'text' as const,
+            data: null,
+            timestamp: new Date(),
+          },
+        ],
+        isThinking: false,
+      }));
+    }
+  },
 }));
 
-// ─── Legacy Context (backward compat with existing NiaProvider/components) ──
-
-export interface NiaState {
-  isOpen: boolean;
-  initialQuery: string;
-  openNia: (query?: string) => void;
-  closeNia: () => void;
-  toggleNia: () => void;
-}
-
-export const NiaContext = createContext<NiaState>({
-  isOpen: false,
-  initialQuery: '',
-  openNia: () => {},
-  closeNia: () => {},
-  toggleNia: () => {},
-});
-
-export const useNiaStore = () => useContext(NiaContext);
-
-// Production extension:
-// - Add WebSocket connection state for streaming Bedrock Agent responses
-// - Persist conversation history to DynamoDB per session_id
-// - Add optimistic updates for cart operations
-// - Integrate with Amazon Personalize for contextual quick chip suggestions
-// - Add message retry/error state for failed API calls
+// ─── Backward-compatible aliases ────────────────────────────────────────────
+// Some components import useNiaStore — point them to the same store
+export const useNiaStore = useNiaChatStore;

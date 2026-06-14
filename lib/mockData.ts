@@ -148,6 +148,26 @@ export const quickStartChips = [
   { label: '🚨 Emergency', query: 'I have a fever, what do I need?' },
 ];
 
+// --- Mock User Profile ---
+import type { UserProfile } from '@/types';
+
+export const MOCK_USER_PRIYA: UserProfile = {
+  id: 'priya-sharma-001',
+  name: 'Priya Sharma',
+  preferences: ['organic', 'vegetarian', 'quick-delivery'],
+  dietary_restrictions: ['vegetarian'],
+  reorder_cycles: [
+    { productId: 'p-d1', productName: 'Amul Toned Milk', avgDays: 3, lastOrderDate: '2026-06-11', daysUntilRunOut: 0, confidence: 'high' },
+    { productId: 'p-pc1', productName: 'Colgate MaxFresh', avgDays: 38, lastOrderDate: '2026-05-10', daysUntilRunOut: 3, confidence: 'medium' },
+  ],
+  past_orders: [
+    { orderId: 'ord-001', date: '2026-06-11', items: ['Amul Milk', 'Bread', 'Eggs'], total: 195 },
+    { orderId: 'ord-002', date: '2026-06-08', items: ['Amul Milk', 'Kurkure', 'Pepsi'], total: 155 },
+  ],
+  pincode: '110001',
+  avatarInitials: 'PS',
+};
+
 // Production extension:
 // - reorderProducts: fetched from Amazon Personalize consumption-cycle predictions
 // - rituals: built from DynamoDB order history + frequency analysis

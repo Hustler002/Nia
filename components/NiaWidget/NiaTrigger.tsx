@@ -8,11 +8,13 @@
 
 import { useNiaChatStore } from '@/lib/useNiaStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 
 export default function NiaTrigger() {
   const { isOpen, toggle, hasProactiveNudge } = useNiaChatStore();
+  const pathname = usePathname();
 
-  if (isOpen) return null;
+  if (isOpen || pathname.startsWith('/seller')) return null;
 
   return (
     <AnimatePresence>

@@ -154,7 +154,7 @@ export default function EmergencyPage() {
                           category: selectedCategory.name,
                         });
                       });
-                      router.push('/payment');
+                      useNiaChatStore.getState().openCart();
                     }}
                     className="bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-lg font-bold py-4 md:px-12 rounded-md shadow-sm transition-all transform hover:-translate-y-0.5"
                   >
