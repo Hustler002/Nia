@@ -166,7 +166,7 @@ export default function ComparisonCard({ data, content }: ComparisonCardProps) {
       {recommended && (
         <div className="px-4 pb-4">
           <button
-            className={`w-full font-semibold text-sm rounded-xl py-2.5 transition-colors shadow-sm ${
+            className={`w-full font-semibold text-sm rounded-xl py-2.5 transition-colors shadow-sm mb-3 ${
               added
                 ? 'bg-[#00838F] text-white cursor-default'
                 : 'bg-[#FF9900] hover:bg-[#e8870d] text-white'
@@ -190,6 +190,13 @@ export default function ComparisonCard({ data, content }: ComparisonCardProps) {
               ? '✓ Added to cart'
               : `Add ${recommended.name} to cart · ₹${recommended.price.toLocaleString('en-IN')}`}
           </button>
+          
+          <a 
+            href={`/compare?ids=${data.products.map((p) => p.id).join(',')}`}
+            className="block text-center text-xs font-semibold text-[#00838F] hover:text-[#006d75] hover:underline transition-colors"
+          >
+            View full comparison →
+          </a>
         </div>
       )}
     </div>

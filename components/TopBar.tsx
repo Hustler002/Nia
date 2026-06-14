@@ -12,10 +12,15 @@ import { UserButton, SignInButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 
 export default function TopBar() {
+<<<<<<< HEAD
   const { open: openNia } = useNiaChatStore();
   const openCart = useCartStore((s) => s.openCart);
   const cartTotalItems = useCartStore((s) => s.getTotalItems());
   const { user: niaUser, pincode } = useUserStore();
+=======
+  const { toggleNia } = useNiaStore();
+  const { liveCart, openCart } = useNiaChatStore();
+>>>>>>> feature/nia-phase-3
   const { isSignedIn } = useUser();
   const [editingPincode, setEditingPincode] = useState(false);
   const [pincodeInput, setPincodeInput] = useState(pincode);

@@ -360,7 +360,7 @@ export default function NiaPanel() {
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && !pathname.startsWith('/seller') && (
         <>
           {/* Backdrop (mobile only - hidden on desktop so users can interact with the page) */}
           <motion.div
