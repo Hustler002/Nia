@@ -59,7 +59,7 @@ export default function TopBar() {
 
           {/* Clerk Auth */}
           {isSignedIn ? (
-            <UserButton afterSignOutUrl="/" />
+            <UserButton />
           ) : (
             <SignInButton mode="modal">
               <button className="text-xs font-semibold text-white bg-[#00838F] hover:bg-[#006d75] px-3 py-1.5 rounded-full transition-colors">

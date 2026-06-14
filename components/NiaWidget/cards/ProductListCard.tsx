@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useNiaChatStore } from '@/lib/useNiaStore';
 import type { CartItem } from '@/lib/useNiaStore';
 
 // ─── Props ──────────────────────────────────────────────────────────────────
@@ -14,6 +15,7 @@ export default function ProductListCard({ items, content }: ProductListCardProps
   const scrollRef = useRef<HTMLDivElement>(null);
   // Track whether the scroll container can still scroll right — drives the fade
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
 
   // Re-evaluate overflow on mount and whenever items change
   useEffect(() => {
@@ -107,15 +109,30 @@ export default function ProductListCard({ items, content }: ProductListCardProps
               {/* Add button */}
               <button
                 type="button"
-                className="
+                className={`
                   w-full mt-2
-                  bg-[#00838F] text-white text-xs font-semibold
+                  text-xs font-semibold
                   rounded-lg py-1.5
-                  hover:bg-[#006d75] active:scale-[0.96]
                   transition-all duration-150
-                "
+                  ${addedIds.has(item.id)
+                    ? 'bg-[#E0F2F1] text-[#00838F] cursor-default'
+                    : 'bg-[#00838F] text-white hover:bg-[#006d75] active:scale-[0.96]'
+                  }
+                `}
+                onClick={() => {
+                  if (addedIds.has(item.id)) return;
+                  useNiaChatStore.getState().addToCart(item);
+                  setAddedIds(prev => new Set(prev).add(item.id));
+                  setTimeout(() => {
+                    setAddedIds(prev => {
+                      const next = new Set(prev);
+                      next.delete(item.id);
+                      return next;
+                    });
+                  }, 2000);
+                }}
               >
-                + Add
+                {addedIds.has(item.id) ? '✓ Added' : '+ Add'}
               </button>
             </div>
           ))}

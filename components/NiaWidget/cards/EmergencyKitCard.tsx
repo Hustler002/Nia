@@ -5,6 +5,8 @@
 
 'use client';
 
+import { useState } from 'react';
+import { useNiaChatStore } from '@/lib/useNiaStore';
 import type { EmergencyKit } from '@/lib/useNiaStore';
 
 interface EmergencyKitCardProps {
@@ -17,6 +19,7 @@ export default function EmergencyKitCard({
   content,
 }: EmergencyKitCardProps) {
   const totalPrice = kit.items.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const [ordered, setOrdered] = useState(false);
 
   return (
     <div className="bg-white rounded-2xl rounded-bl-md border border-gray-100 border-l-4 border-l-[#FF9900] shadow-sm overflow-hidden bg-gradient-to-b from-orange-50/50 to-white">
@@ -74,10 +77,22 @@ export default function EmergencyKitCard({
           </span>
         </div>
         <button
-          className="w-full bg-[#FF9900] hover:bg-[#e8870d] text-white font-bold text-sm rounded-xl py-3 transition-colors shadow-md"
-          style={{ animation: 'emergency-pulse 2s ease-in-out infinite' }}
+          className={`w-full font-bold text-sm rounded-xl py-3 transition-colors shadow-md ${
+            ordered
+              ? 'bg-[#00838F] text-white cursor-default'
+              : 'bg-[#FF9900] hover:bg-[#e8870d] text-white'
+          }`}
+          style={ordered ? undefined : { animation: 'emergency-pulse 2s ease-in-out infinite' }}
+          onClick={() => {
+            if (ordered) return;
+            kit.items.forEach(item => {
+              useNiaChatStore.getState().addToCart(item);
+            });
+            setOrdered(true);
+            setTimeout(() => setOrdered(false), 3000);
+          }}
         >
-          Order Emergency Kit Now
+          {ordered ? '✓ Kit added to cart!' : 'Order Emergency Kit Now'}
         </button>
         <p className="text-center text-[10px] text-gray-300 mt-2">
           Free delivery on emergency orders · No minimum

@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { EMERGENCY_CATEGORIES, EmergencyCategory, detectEmergencyCategory } from '@/lib/emergency/categories';
+import { useNiaChatStore } from '@/lib/useNiaStore';
 
 export default function EmergencyPage() {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<EmergencyCategory | null>(null);
   const selectedRef = useRef<HTMLDivElement>(null);
@@ -30,7 +33,7 @@ export default function EmergencyPage() {
           <h1 className="text-3xl sm:text-4xl font-extrabold mb-2 tracking-tight">🚨 What's the emergency?</h1>
           <p className="text-red-100 text-lg mb-6 opacity-90">Tell us or tap below — assembled kit + order in 60 seconds</p>
           
-          <div className="relative">
+          <div className="relative hidden md:block">
             <input
               type="text"
               value={query}
@@ -38,7 +41,7 @@ export default function EmergencyPage() {
               placeholder="Describe your emergency... (e.g. 'my baby has rash')"
               className="w-full text-gray-900 px-5 py-4 rounded-xl text-lg outline-none focus:ring-4 focus:ring-red-300 transition-all shadow-lg font-medium"
             />
-            <button className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-2xl">
+            <button aria-label="Voice input" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 text-2xl">
               🎤
             </button>
           </div>
@@ -122,10 +125,32 @@ export default function EmergencyPage() {
                 </div>
                 
                 <div className="flex flex-col w-full md:w-auto gap-3">
-                  <button className="bg-orange-500 hover:bg-orange-600 text-white text-lg font-bold py-4 md:px-12 rounded-xl shadow-lg shadow-orange-500/30 transition-all transform hover:-translate-y-1">
+                  <button
+                    onClick={() => {
+                      selectedCategory.kit.forEach(item => {
+                        useNiaChatStore.getState().addToCart({
+                          id: item.id,
+                          name: item.name,
+                          price: item.price,
+                          mrp: item.price + 20,
+                          image: item.image,
+                          qty: item.qty,
+                          category: selectedCategory.name,
+                        });
+                      });
+                      router.push('/payment');
+                    }}
+                    className="bg-orange-500 hover:bg-orange-600 text-white text-lg font-bold py-4 md:px-12 rounded-xl shadow-lg shadow-orange-500/30 transition-all transform hover:-translate-y-1"
+                  >
                     Order this kit
                   </button>
-                  <button className="text-gray-500 hover:text-gray-900 font-medium text-sm underline underline-offset-4 decoration-gray-300 text-center">
+                  <button
+                    onClick={() => {
+                      useNiaChatStore.getState().open('Customize my ' + selectedCategory.name + ' emergency kit');
+                      router.push('/');
+                    }}
+                    className="text-gray-500 hover:text-gray-900 font-medium text-sm underline underline-offset-4 decoration-gray-300 text-center"
+                  >
                     Customize kit in chat
                   </button>
                 </div>

@@ -163,19 +163,20 @@ export function detectRituals(_orderHistory?: OrderBundle[]): Ritual[] {
 
 // ─── Mock Rituals ───────────────────────────────────────────────────────────
 
-const today = new Date();
-const daysAgo = (n: number): Date => {
-  const d = new Date(today);
-  d.setDate(d.getDate() - n);
-  return d;
-};
-const daysFromNow = (n: number): Date => {
-  const d = new Date(today);
-  d.setDate(d.getDate() + n);
-  return d;
-};
-
 export function getMockRituals(): Ritual[] {
+  // Compute fresh date each call — not at module level — to avoid stale dates on long-running servers
+  const today = new Date();
+  const daysAgo = (n: number): Date => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - n);
+    return d;
+  };
+  const daysFromNow = (n: number): Date => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + n);
+    return d;
+  };
+
   return [
     {
       id: 'ritual-001',

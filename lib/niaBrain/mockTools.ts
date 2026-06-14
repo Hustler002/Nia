@@ -20,7 +20,7 @@ export async function executeMockTool(toolName: string, toolArgs: any, userId?: 
       return { availability: toolArgs.product_ids.map((id: string) => ({ productId: id, inStock: true, eta_minutes: 10, store: 'Central Hub' })) };
 
     case 'get_user_profile': {
-      let past_orders = [];
+      let past_orders: any[] = [];
       if (userId && supabase) {
         const { data: orders } = await supabase
           .from('orders')

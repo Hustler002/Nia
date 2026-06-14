@@ -6,6 +6,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useNiaChatStore } from '@/lib/useNiaStore';
 import type { ComparisonData } from '@/lib/useNiaStore';
 
 interface ComparisonCardProps {
@@ -36,6 +37,7 @@ function StarRating({ rating }: { rating: number }) {
 
 export default function ComparisonCard({ data, content }: ComparisonCardProps) {
   const [showWhy, setShowWhy] = useState(false);
+  const [added, setAdded] = useState(false);
   const recommended = data.products.find((p) => p.recommended);
 
   return (
@@ -163,9 +165,30 @@ export default function ComparisonCard({ data, content }: ComparisonCardProps) {
       {/* Add to cart CTA */}
       {recommended && (
         <div className="px-4 pb-4">
-          <button className="w-full bg-[#FF9900] hover:bg-[#e8870d] text-white font-semibold text-sm rounded-xl py-2.5 transition-colors shadow-sm">
-            Add {recommended.name} to cart · ₹
-            {recommended.price.toLocaleString('en-IN')}
+          <button
+            className={`w-full font-semibold text-sm rounded-xl py-2.5 transition-colors shadow-sm ${
+              added
+                ? 'bg-[#00838F] text-white cursor-default'
+                : 'bg-[#FF9900] hover:bg-[#e8870d] text-white'
+            }`}
+            onClick={() => {
+              if (added) return;
+              useNiaChatStore.getState().addToCart({
+                id: recommended.id,
+                name: recommended.name,
+                price: recommended.price,
+                mrp: recommended.price,
+                image: recommended.image,
+                qty: 1,
+                category: 'Electronics',
+              });
+              setAdded(true);
+              setTimeout(() => setAdded(false), 2000);
+            }}
+          >
+            {added
+              ? '✓ Added to cart'
+              : `Add ${recommended.name} to cart · ₹${recommended.price.toLocaleString('en-IN')}`}
           </button>
         </div>
       )}
