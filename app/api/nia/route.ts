@@ -1,7 +1,7 @@
 import { Groq } from 'groq-sdk';
 import type { NiaMessage } from '@/types';
 import { TOOL_DEFINITIONS } from '@/lib/niaBrain/tools';
-import { executeMockTool } from '@/lib/niaBrain/mockTools';
+import { executeMockTool, executeCustomEmergencyKit } from '@/lib/niaBrain/mockTools';
 import { detectEmergencyCategory } from '@/lib/emergency/categories';
 import { NIA_SYSTEM_PROMPT } from '@/lib/niaBrain/systemPrompt';
 import { fetchMemoryContext, extractAndSaveMemories, resolveAddress } from '@/lib/memoryEngine';
@@ -119,6 +119,59 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
       reason: 'Based on your order history: milk every 3 days, toothpaste every 38 days.',
       timestamp: new Date()
     } as any;
+  }
+
+  // FLOW 6 — Custom Emergency Detection (freeform emergencies not in the 8 categories)
+  const isCustomEmergency =
+    ['tyre', 'tire', 'puncture', 'flat'].some(t => lowerMsg.includes(t)) ||
+    ['power cut', 'bijli', 'lights out', 'power outage', 'power failure', 'load shedding', 'no electricity', 'bijli gayi'].some(t => lowerMsg.includes(t)) ||
+    ['locked out', 'lost keys', 'keys lost', 'ghar band', 'chabi kho gayi', 'cant get in'].some(t => lowerMsg.includes(t)) ||
+    ['flood', 'flooding', 'water leak', 'pipe burst', 'water everywhere', 'paani leak'].some(t => lowerMsg.includes(t)) ||
+    ['gas empty', 'cylinder empty', 'gas leak', 'gas smell', 'gas khatam', 'cooking gas'].some(t => lowerMsg.includes(t)) ||
+    ['laptop charger', 'charger missing', 'hdmi', 'presentation', 'adapter', 'dongle', 'work emergency'].some(t => lowerMsg.includes(t)) ||
+    ['car wont start', 'car not starting', 'dead battery', 'battery dead', 'car battery', 'jump start', 'gaadi start nahi'].some(t => lowerMsg.includes(t)) ||
+    ['heart attack', 'stroke', 'unconscious', 'not breathing', 'bleeding heavily', 'call ambulance'].some(t => lowerMsg.includes(t)) ||
+    ['fire', 'aag', 'smoke', 'burning'].some(t => lowerMsg.includes(t));
+
+  if (isCustomEmergency) {
+    const result = executeCustomEmergencyKit(userMessage);
+
+    if (result.kit) {
+      return {
+        id: 'mock-' + Date.now(),
+        role: 'nia',
+        type: 'emergency_kit',
+        content: result.niaMessage,
+        data: {
+          category: result.kit.category,
+          name: result.kit.name,
+          items: result.kit.items,
+          totalPrice: result.kit.totalPrice,
+          eta: result.kit.eta,
+          canFullyHelp: result.canFullyHelp,
+          canPartiallyHelp: result.canPartiallyHelp,
+          cannotHelpWith: result.cannotHelpWith ?? [],
+          alternativeSuggestion: result.alternativeSuggestion ?? null,
+        },
+        confidence: result.canFullyHelp ? 90 : 72,
+        reason: result.canFullyHelp
+          ? 'All items deliverable in 10–30 min from nearby dark stores.'
+          : 'Partial kit — covers what Amazon Now can deliver. See suggestions for the rest.',
+        timestamp: new Date(),
+      } as any;
+    } else {
+      // Safety override or unknown emergency — return clarifying text response
+      return {
+        id: 'mock-' + Date.now(),
+        role: 'nia',
+        type: 'text',
+        content: result.niaMessage,
+        data: null,
+        confidence: 0,
+        reason: result.alternativeSuggestion || '',
+        timestamp: new Date(),
+      } as any;
+    }
   }
 
   return null;
