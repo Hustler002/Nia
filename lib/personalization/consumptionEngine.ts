@@ -312,6 +312,79 @@ export function getRunningLowItems(): ConsumptionCycle[] {
   return predictConsumption(getMockOrderHistory());
 }
 
+/**
+ * Returns ALL consumption cycle predictions (no 7-day window filter).
+ * Used by the "See all predictions" expanded view to show upcoming items
+ * that aren't yet urgent but will need reordering eventually.
+ */
+export function getAllPredictions(): ConsumptionCycle[] {
+  const today = new Date();
+  const orderHistory = getMockOrderHistory();
+
+  // ── Reuse the grouping + prediction logic from predictConsumption ──
+  const grouped = new Map<string, typeof orderHistory>();
+  for (const order of orderHistory) {
+    const existing = grouped.get(order.productId) || [];
+    existing.push(order);
+    grouped.set(order.productId, existing);
+  }
+
+  const cycles: ConsumptionCycle[] = [];
+
+  for (const [productId, orders] of grouped) {
+    orders.sort((a, b) => a.orderDate.getTime() - b.orderDate.getTime());
+    const latest = orders[orders.length - 1];
+    const dataPoints = orders.length;
+
+    let avgDaysBetweenOrders: number;
+    let confidence: 'high' | 'medium' | 'low';
+
+    if (dataPoints >= 2) {
+      const intervals: number[] = [];
+      for (let i = 1; i < orders.length; i++) {
+        intervals.push(daysBetween(orders[i].orderDate, orders[i - 1].orderDate));
+      }
+      avgDaysBetweenOrders = intervals.reduce((sum, v) => sum + v, 0) / intervals.length;
+      const stdDev = standardDeviation(intervals);
+      confidence = dataPoints >= 4 && stdDev < 7 ? 'high' : 'medium';
+    } else {
+      avgDaysBetweenOrders = DEFAULT_CYCLE_DAYS;
+      confidence = 'low';
+    }
+
+    const predictedRunOutDate = new Date(latest.orderDate);
+    predictedRunOutDate.setDate(predictedRunOutDate.getDate() + Math.round(avgDaysBetweenOrders));
+    const daysUntilRunOut = Math.round((predictedRunOutDate.getTime() - today.getTime()) / MS_PER_DAY);
+    const rawPercent = Math.round(((avgDaysBetweenOrders - daysUntilRunOut) / avgDaysBetweenOrders) * 100);
+    const percentUsed = clamp(rawPercent, 0, 100);
+    const totalQuantity = orders.reduce((sum, o) => sum + o.quantity, 0);
+    const totalSpanDays = daysBetween(orders[0].orderDate, orders[orders.length - 1].orderDate);
+    const estimatedQuantityPerDay = totalSpanDays > 0 ? totalQuantity / totalSpanDays : totalQuantity / DEFAULT_CYCLE_DAYS;
+    const daysSinceLastOrder = Math.round((today.getTime() - latest.orderDate.getTime()) / MS_PER_DAY);
+
+    cycles.push({
+      productId,
+      productName: latest.productName,
+      image: latest.image,
+      category: latest.category,
+      price: latest.price,
+      unit: latest.unit,
+      avgDaysBetweenOrders: Math.round(avgDaysBetweenOrders * 10) / 10,
+      lastOrderDate: latest.orderDate,
+      daysSinceLastOrder,
+      estimatedQuantityPerDay: Math.round(estimatedQuantityPerDay * 1000) / 1000,
+      predictedRunOutDate,
+      daysUntilRunOut,
+      confidence,
+      alertThreshold: DEFAULT_ALERT_THRESHOLD,
+      percentUsed,
+    });
+  }
+
+  cycles.sort((a, b) => a.daysUntilRunOut - b.daysUntilRunOut);
+  return cycles; // No filter — return everything
+}
+
 // ─────────────────────────────────────────────────────────────
 // Production Extension Notes
 // ─────────────────────────────────────────────────────────────

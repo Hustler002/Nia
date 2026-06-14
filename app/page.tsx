@@ -1,5 +1,4 @@
 import Link from "next/link";
-import TopBar from "@/components/TopBar";
 import HeroSection from "@/components/HeroSection";
 import EmergencyBanner from "@/components/EmergencyBanner";
 import ReorderRow from "@/components/ReorderRow";
@@ -11,9 +10,6 @@ import ProductBrowsePanel from "@/components/ProductBrowsePanel";
 export default function HomePage() {
   return (
     <>
-      {/* Sticky navigation */}
-      <TopBar />
-
       <main className="flex-1">
         {/* Hero: Nia conversational input — the centerpiece */}
         <HeroSection />

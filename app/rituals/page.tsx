@@ -1,16 +1,41 @@
 // app/rituals/page.tsx
 // Full rituals management page — view, edit, delete, create rituals.
-// Features: expanded item lists, bulk reorder, emoji picker, edit/rename.
+// Features: expanded item lists, bulk reorder, emoji picker, edit/rename,
+// per-item quantity editing, add/remove items, create new ritual from scratch.
 // Production: CRUD operations via DynamoDB API routes
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMockRituals, ritualToCartItems, getSubstitutions } from '@/lib/rituals/ritualDetector';
 import type { Ritual, RitualItem } from '@/lib/rituals/ritualDetector';
 import { useNiaChatStore } from '@/lib/useNiaStore';
+
+// ── Available products catalog for add-item picker ──────────────────────────
+
+const AVAILABLE_PRODUCTS: RitualItem[] = [
+  { productId: 'ap-001', name: 'Amul Toned Milk 500ml', price: 24, mrp: 24, image: '🥛', quantity: 1, category: 'Dairy & Eggs', inStock: true },
+  { productId: 'ap-002', name: 'Britannia Bread 400g', price: 45, mrp: 50, image: '🍞', quantity: 1, category: 'Groceries', inStock: true },
+  { productId: 'ap-003', name: 'Farm Fresh Eggs (6 pcs)', price: 48, mrp: 55, image: '🥚', quantity: 1, category: 'Dairy & Eggs', inStock: true },
+  { productId: 'ap-004', name: 'Amul Butter 100g', price: 56, mrp: 56, image: '🧈', quantity: 1, category: 'Dairy & Eggs', inStock: true },
+  { productId: 'ap-005', name: 'Tata Salt 1kg', price: 28, mrp: 28, image: '🧂', quantity: 1, category: 'Kitchen Essentials', inStock: true },
+  { productId: 'ap-006', name: 'India Gate Sugar 1kg', price: 48, mrp: 52, image: '🍬', quantity: 1, category: 'Kitchen Essentials', inStock: true },
+  { productId: 'ap-007', name: 'Fortune Sunlite Oil 1L', price: 155, mrp: 170, image: '🫙', quantity: 1, category: 'Kitchen Essentials', inStock: true },
+  { productId: 'ap-008', name: 'Toor Dal 1kg', price: 140, mrp: 160, image: '🫘', quantity: 1, category: 'Groceries', inStock: true },
+  { productId: 'ap-009', name: 'Nescafé Classic 50g', price: 125, mrp: 140, image: '☕', quantity: 1, category: 'Beverages', inStock: true },
+  { productId: 'ap-010', name: 'Red Label Tea 250g', price: 105, mrp: 120, image: '🍵', quantity: 1, category: 'Beverages', inStock: true },
+  { productId: 'ap-011', name: "Lay's Classic 150g", price: 50, mrp: 50, image: '🥔', quantity: 1, category: 'Snacks', inStock: true },
+  { productId: 'ap-012', name: 'Kurkure Masala 120g', price: 30, mrp: 30, image: '🌶️', quantity: 1, category: 'Snacks', inStock: true },
+  { productId: 'ap-013', name: 'Pepsi 2L', price: 80, mrp: 85, image: '🥤', quantity: 1, category: 'Beverages', inStock: true },
+  { productId: 'ap-014', name: 'Oreo Original 300g', price: 60, mrp: 65, image: '🍪', quantity: 1, category: 'Snacks', inStock: true },
+  { productId: 'ap-015', name: 'Colgate MaxFresh 200g', price: 142, mrp: 165, image: '🪥', quantity: 1, category: 'Personal Care', inStock: true },
+  { productId: 'ap-016', name: 'Maggi 2-Min Noodles 4-pack', price: 56, mrp: 60, image: '🍜', quantity: 1, category: 'Groceries', inStock: true },
+  { productId: 'ap-017', name: 'Basmati Rice 5kg', price: 450, mrp: 499, image: '🍚', quantity: 1, category: 'Groceries', inStock: true },
+  { productId: 'ap-018', name: 'Moong Dal 500g', price: 75, mrp: 85, image: '🫛', quantity: 1, category: 'Groceries', inStock: true },
+];
 
 // ── Emoji Picker ────────────────────────────────────────────────────────────
 
@@ -46,23 +71,79 @@ function EmojiPicker({
   );
 }
 
+// ── Add Item Picker ─────────────────────────────────────────────────────────
+
+function AddItemPicker({
+  existingIds,
+  onAdd,
+  onClose,
+}: {
+  existingIds: string[];
+  onAdd: (item: RitualItem) => void;
+  onClose: () => void;
+}) {
+  const [search, setSearch] = useState('');
+
+  const available = AVAILABLE_PRODUCTS.filter(
+    p => !existingIds.includes(p.productId) &&
+      p.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="bg-[#F7F8F8] border border-[#D5D9D9] rounded-sm p-3 mt-2">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-bold text-[#0F1111]">Add item to ritual</p>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
+      </div>
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search products..."
+        className="w-full text-xs bg-white border border-[#D5D9D9] rounded-sm px-3 py-2 outline-none focus:border-[#007185] transition-colors mb-2"
+        autoFocus
+      />
+      <div className="max-h-40 overflow-y-auto space-y-1">
+        {available.length > 0 ? available.map(item => (
+          <button
+            key={item.productId}
+            onClick={() => { onAdd(item); onClose(); }}
+            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-sm hover:bg-white transition-colors text-left"
+          >
+            <span className="text-lg">{item.image}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-[#0F1111] truncate">{item.name}</p>
+              <p className="text-[10px] text-gray-400">{item.category}</p>
+            </div>
+            <span className="text-xs font-semibold text-[#0F1111]">₹{item.price}</span>
+          </button>
+        )) : (
+          <p className="text-xs text-gray-400 text-center py-3">No matching products</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Ritual Detail Card (expanded) ───────────────────────────────────────────
 
 function RitualDetailCard({
   ritual,
   onReorder,
   onDelete,
-  onRename,
+  onUpdate,
 }: {
   ritual: Ritual;
   onReorder: (ritual: Ritual) => void;
   onDelete: (id: string) => void;
-  onRename: (id: string, name: string, icon: string) => void;
+  onUpdate: (id: string, updates: Partial<Ritual>) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(ritual.name);
   const [editIcon, setEditIcon] = useState(ritual.icon);
+  const [editItems, setEditItems] = useState<RitualItem[]>(ritual.items);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showAddItem, setShowAddItem] = useState(false);
   const [reordered, setReordered] = useState(false);
 
   const outOfStock = ritual.items.filter(i => !i.inStock);
@@ -74,8 +155,42 @@ function RitualDetailCard({
   };
 
   const handleSave = () => {
-    onRename(ritual.id, editName, editIcon);
+    const newTotal = editItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    onUpdate(ritual.id, {
+      name: editName,
+      icon: editIcon,
+      items: editItems,
+      estimatedTotal: newTotal,
+      autoNamed: false,
+    });
     setEditing(false);
+    setShowAddItem(false);
+  };
+
+  const handleCancel = () => {
+    setEditing(false);
+    setEditName(ritual.name);
+    setEditIcon(ritual.icon);
+    setEditItems(ritual.items);
+    setShowAddItem(false);
+  };
+
+  const handleItemQtyChange = (productId: string, delta: number) => {
+    setEditItems(prev =>
+      prev.map(item =>
+        item.productId === productId
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
+      )
+    );
+  };
+
+  const handleRemoveItem = (productId: string) => {
+    setEditItems(prev => prev.filter(i => i.productId !== productId));
+  };
+
+  const handleAddItem = (item: RitualItem) => {
+    setEditItems(prev => [...prev, { ...item, quantity: 1 }]);
   };
 
   const frequencyLabel = {
@@ -85,6 +200,8 @@ function RitualDetailCard({
     monthly: 'Every month',
     custom: 'Custom',
   }[ritual.frequency];
+
+  const editTotal = editItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   return (
     <motion.div
@@ -118,10 +235,10 @@ function RitualDetailCard({
                 className="px-4 py-1.5 bg-[#FFD814] text-[#0F1111] text-xs font-bold
                   rounded-md hover:bg-[#F7CA00] transition-colors"
               >
-                Save
+                Save changes
               </button>
               <button
-                onClick={() => { setEditing(false); setEditName(ritual.name); setEditIcon(ritual.icon); }}
+                onClick={handleCancel}
                 className="px-4 py-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700
                   transition-colors"
               >
@@ -185,7 +302,7 @@ function RitualDetailCard({
       {/* ── Items list ────────────────────────────────────────────── */}
       <div className="px-5 py-4">
         <div className="space-y-2">
-          {ritual.items.map(item => (
+          {(editing ? editItems : ritual.items).map(item => (
             <div
               key={item.productId}
               className={`flex items-center justify-between py-1.5 ${
@@ -206,39 +323,102 @@ function RitualDetailCard({
                 </div>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
-                <span className="text-xs text-gray-400">×{item.quantity}</span>
-                <span className="text-sm font-semibold text-[#0F1111]">
-                  ₹{item.price * item.quantity}
-                </span>
+                {editing ? (
+                  <>
+                    {/* Quantity controls */}
+                    <div className="flex items-center gap-1 border border-[#D5D9D9] rounded-sm">
+                      <button
+                        onClick={() => handleItemQtyChange(item.productId, -1)}
+                        className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors text-sm font-bold"
+                      >
+                        −
+                      </button>
+                      <span className="w-6 text-center text-xs font-semibold text-[#0F1111]">{item.quantity}</span>
+                      <button
+                        onClick={() => handleItemQtyChange(item.productId, 1)}
+                        className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors text-sm font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <span className="text-sm font-semibold text-[#0F1111] w-12 text-right">
+                      ₹{item.price * item.quantity}
+                    </span>
+                    {/* Remove button */}
+                    <button
+                      onClick={() => handleRemoveItem(item.productId)}
+                      className="w-6 h-6 rounded-sm hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+                      aria-label="Remove item"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-xs text-gray-400">×{item.quantity}</span>
+                    <span className="text-sm font-semibold text-[#0F1111]">
+                      ₹{item.price * item.quantity}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           ))}
         </div>
 
+        {/* ── Add item (edit mode) ─────────────────────────────────── */}
+        {editing && (
+          <>
+            {showAddItem ? (
+              <AddItemPicker
+                existingIds={editItems.map(i => i.productId)}
+                onAdd={handleAddItem}
+                onClose={() => setShowAddItem(false)}
+              />
+            ) : (
+              <button
+                onClick={() => setShowAddItem(true)}
+                className="mt-3 flex items-center gap-2 text-xs text-[#007185] font-semibold hover:text-[#C45500] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Add item
+              </button>
+            )}
+          </>
+        )}
+
         {/* ── Total + Reorder ─────────────────────────────────────── */}
         <div className="border-t border-gray-100 mt-3 pt-3 flex items-center justify-between">
           <div>
-            <p className="text-base font-bold text-[#0F1111]">₹{ritual.estimatedTotal}</p>
+            <p className="text-base font-bold text-[#0F1111]">
+              ₹{editing ? editTotal : ritual.estimatedTotal}
+            </p>
             <p className="text-[11px] text-gray-400">
               Last ordered {ritual.daysSinceLastOrder} days ago
             </p>
           </div>
-          <button
-            onClick={handleReorder}
-            disabled={reordered}
-            className={`px-6 py-2.5 text-sm font-bold rounded-md transition-all
-              active:scale-[0.97] ${
-              reordered
-                ? 'bg-green-50 text-green-600'
-                : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] shadow-sm hover:shadow-md'
-            }`}
-          >
-            {reordered ? '✓ Added to cart!' : `Reorder all · ₹${ritual.estimatedTotal}`}
-          </button>
+          {!editing && (
+            <button
+              onClick={handleReorder}
+              disabled={reordered}
+              className={`px-6 py-2.5 text-sm font-bold rounded-md transition-all
+                active:scale-[0.97] ${
+                reordered
+                  ? 'bg-green-50 text-green-600'
+                  : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] shadow-sm hover:shadow-md'
+              }`}
+            >
+              {reordered ? '✓ Added to cart!' : `Reorder all · ₹${ritual.estimatedTotal}`}
+            </button>
+          )}
         </div>
 
         {/* ── Out-of-stock warning ────────────────────────────────── */}
-        {outOfStock.length > 0 && (
+        {!editing && outOfStock.length > 0 && (
           <p className="text-xs text-amber-600 mt-2">
             ⚠ {outOfStock.length} item{outOfStock.length > 1 ? 's' : ''} currently
             out of stock — Nia will suggest substitutes when you reorder.
@@ -281,14 +461,188 @@ function RitualDetailCard({
   );
 }
 
+// ── Create New Ritual Form ──────────────────────────────────────────────────
+
+function CreateRitualForm({
+  onSave,
+  onCancel,
+}: {
+  onSave: (ritual: Ritual) => void;
+  onCancel: () => void;
+}) {
+  const [name, setName] = useState('');
+  const [icon, setIcon] = useState('📋');
+  const [items, setItems] = useState<RitualItem[]>([]);
+  const [showAddItem, setShowAddItem] = useState(false);
+
+  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  const handleSave = () => {
+    if (!name.trim() || items.length === 0) return;
+
+    const now = new Date();
+    const ritual: Ritual = {
+      id: `ritual-new-${Date.now()}`,
+      name: name.trim(),
+      icon,
+      items,
+      estimatedTotal: total,
+      lastOrdered: now,
+      frequency: 'weekly',
+      nextSuggestedDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+      autoNamed: false,
+      orderCount: 0,
+      daysSinceLastOrder: 0,
+    };
+    onSave(ritual);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white rounded-sm border-2 border-[#00838F] overflow-hidden shadow-md"
+    >
+      <div className="bg-gradient-to-r from-[#00838F] to-[#006d75] px-5 py-4">
+        <h3 className="text-base font-bold text-white">Create New Ritual</h3>
+        <p className="text-xs text-white/70 mt-0.5">Bundle items you buy together for one-click reorder</p>
+      </div>
+
+      <div className="px-5 py-4 space-y-4">
+        {/* Name + icon */}
+        <div>
+          <label className="text-xs font-bold text-[#0F1111] block mb-1.5">Ritual name</label>
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">{icon}</span>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder='e.g. "Monday Morning", "Gym Fuel"'
+              className="flex-1 text-sm bg-white border border-[#D5D9D9] rounded-sm px-3 py-2
+                outline-none focus:border-[#007185] transition-colors"
+              autoFocus
+            />
+          </div>
+        </div>
+
+        {/* Emoji picker */}
+        <div>
+          <label className="text-xs font-bold text-[#0F1111] block mb-1.5">Choose an icon</label>
+          <EmojiPicker selected={icon} onSelect={setIcon} />
+        </div>
+
+        {/* Items list */}
+        <div>
+          <label className="text-xs font-bold text-[#0F1111] block mb-1.5">
+            Items ({items.length} added{items.length > 0 ? ` · ₹${total}` : ''})
+          </label>
+          {items.length > 0 ? (
+            <div className="space-y-2 mb-2">
+              {items.map(item => (
+                <div key={item.productId} className="flex items-center justify-between py-1.5">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-lg">{item.image}</span>
+                    <p className="text-sm text-[#0F1111] truncate">{item.name}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-1 border border-[#D5D9D9] rounded-sm">
+                      <button
+                        onClick={() => setItems(prev => prev.map(i => i.productId === item.productId ? { ...i, quantity: Math.max(1, i.quantity - 1) } : i))}
+                        className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-100 text-sm font-bold"
+                      >−</button>
+                      <span className="w-6 text-center text-xs font-semibold">{item.quantity}</span>
+                      <button
+                        onClick={() => setItems(prev => prev.map(i => i.productId === item.productId ? { ...i, quantity: i.quantity + 1 } : i))}
+                        className="w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-100 text-sm font-bold"
+                      >+</button>
+                    </div>
+                    <span className="text-xs font-semibold w-10 text-right">₹{item.price * item.quantity}</span>
+                    <button
+                      onClick={() => setItems(prev => prev.filter(i => i.productId !== item.productId))}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 mb-2">No items yet. Add products below.</p>
+          )}
+
+          {showAddItem ? (
+            <AddItemPicker
+              existingIds={items.map(i => i.productId)}
+              onAdd={(item) => setItems(prev => [...prev, { ...item, quantity: 1 }])}
+              onClose={() => setShowAddItem(false)}
+            />
+          ) : (
+            <button
+              onClick={() => setShowAddItem(true)}
+              className="flex items-center gap-2 text-xs text-[#007185] font-semibold hover:text-[#C45500] transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add item from catalog
+            </button>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!name.trim() || items.length === 0}
+            className={`px-6 py-2 text-sm font-bold rounded-md transition-all ${
+              !name.trim() || items.length === 0
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] shadow-sm'
+            }`}
+          >
+            Save Ritual · ₹{total}
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // ── Main Page ───────────────────────────────────────────────────────────────
 
 export default function RitualsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#EAEDED] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#FF9900] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <RitualsPageInner />
+    </Suspense>
+  );
+}
+
+function RitualsPageInner() {
+  const searchParams = useSearchParams();
   const [rituals, setRituals] = useState<Ritual[]>([]);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   useEffect(() => {
     setRituals(getMockRituals());
-  }, []);
+    // Auto-open create form if navigating from homepage "Create new ritual" CTA
+    if (searchParams.get('create') === '1') {
+      setShowCreateForm(true);
+    }
+  }, [searchParams]);
 
   const handleReorder = (ritual: Ritual) => {
     const subs = getSubstitutions(ritual);
@@ -301,10 +655,15 @@ export default function RitualsPage() {
     setRituals(prev => prev.filter(r => r.id !== id));
   };
 
-  const handleRename = (id: string, name: string, icon: string) => {
+  const handleUpdate = (id: string, updates: Partial<Ritual>) => {
     setRituals(prev =>
-      prev.map(r => r.id === id ? { ...r, name, icon, autoNamed: false } : r)
+      prev.map(r => r.id === id ? { ...r, ...updates } : r)
     );
+  };
+
+  const handleCreateNew = (ritual: Ritual) => {
+    setRituals(prev => [ritual, ...prev]);
+    setShowCreateForm(false);
   };
 
   const handleBulkReorder = () => {
@@ -322,7 +681,7 @@ export default function RitualsPage() {
   return (
     <div className="min-h-screen bg-[#EAEDED]">
       {/* ── Header ───────────────────────────────────────────────── */}
-      <div className="bg-white border-b border-[#D5D9D9] sticky top-0 z-40">
+      <div className="bg-white border-b border-[#D5D9D9] sticky top-14 z-40">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
@@ -342,19 +701,39 @@ export default function RitualsPage() {
               </p>
             </div>
           </div>
-          <button
-            onClick={handleBulkReorder}
-            className="px-4 py-2 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-xs
-              font-bold rounded-md transition-colors shadow-sm hover:shadow-md
-              active:scale-[0.97]"
-          >
-            Reorder all · ₹{totalAllRituals}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="px-3 py-2 text-xs font-bold text-[#007185] border border-[#D5D9D9]
+                rounded-md hover:bg-[#F7F8F8] transition-colors"
+            >
+              + New Ritual
+            </button>
+            <button
+              onClick={handleBulkReorder}
+              className="px-4 py-2 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-xs
+                font-bold rounded-md transition-colors shadow-sm hover:shadow-md
+                active:scale-[0.97]"
+            >
+              Reorder all · ₹{totalAllRituals}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ── Rituals list ─────────────────────────────────────────── */}
+      {/* ── Content ──────────────────────────────────────────────── */}
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+        {/* Create form */}
+        <AnimatePresence>
+          {showCreateForm && (
+            <CreateRitualForm
+              onSave={handleCreateNew}
+              onCancel={() => setShowCreateForm(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Rituals list */}
         <AnimatePresence mode="popLayout">
           {rituals.map(ritual => (
             <RitualDetailCard
@@ -362,12 +741,12 @@ export default function RitualsPage() {
               ritual={ritual}
               onReorder={handleReorder}
               onDelete={handleDelete}
-              onRename={handleRename}
+              onUpdate={handleUpdate}
             />
           ))}
         </AnimatePresence>
 
-        {rituals.length === 0 && (
+        {rituals.length === 0 && !showCreateForm && (
           <div className="text-center py-12">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#E0F2F1]
               flex items-center justify-center">
@@ -375,12 +754,10 @@ export default function RitualsPage() {
             </div>
             <p className="text-base font-bold text-[#0F1111]">No rituals yet</p>
             <p className="text-sm text-gray-400 mt-1">
-              Nia will detect your patterns automatically, or you can create one manually.
+              Create a ritual to bundle items you buy together for one-click reorder.
             </p>
             <button
-              onClick={() => useNiaChatStore.getState().open(
-                'Help me create a new ritual for items I buy every week'
-              )}
+              onClick={() => setShowCreateForm(true)}
               className="mt-4 px-6 py-2.5 bg-[#00838F] hover:bg-[#006d75] text-white
                 text-sm font-semibold rounded-md transition-colors"
             >
@@ -390,7 +767,7 @@ export default function RitualsPage() {
         )}
 
         {/* ── Import from past order section ──────────────────────── */}
-        {rituals.length > 0 && (
+        {rituals.length > 0 && !showCreateForm && (
           <div className="bg-white rounded-sm border border-[#D5D9D9] p-5 text-center">
             <p className="text-sm font-semibold text-[#0F1111]">
               📋 Turn a past order into a ritual

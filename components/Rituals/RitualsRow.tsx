@@ -7,10 +7,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { getMockRituals } from '@/lib/rituals/ritualDetector';
 import type { Ritual } from '@/lib/rituals/ritualDetector';
 import RitualCard from './RitualCard';
-import { useNiaChatStore } from '@/lib/useNiaStore';
 
 export default function RitualsRow() {
   const [rituals, setRituals] = useState<Ritual[]>([]);
@@ -21,10 +21,10 @@ export default function RitualsRow() {
     requestAnimationFrame(() => setMounted(true));
   }, []);
 
+  const router = useRouter();
+
   const handleCreateNew = () => {
-    useNiaChatStore.getState().open(
-      "Help me create a new ritual. I usually order these items together every week..."
-    );
+    router.push('/rituals?create=1');
   };
 
   return (
@@ -64,8 +64,8 @@ export default function RitualsRow() {
 
           {/* ── "+ Create new ritual" card ────────────────────────────── */}
           <div className="snap-start">
-            <button
-              onClick={handleCreateNew}
+            <Link
+              href="/rituals?create=1"
               className="flex-shrink-0 w-52 sm:w-56 h-full min-h-[240px] bg-white rounded-sm
                 border-2 border-dashed border-[#D5D9D9] hover:border-[#007185]
                 hover:bg-[#F7F8F8] transition-all duration-200
@@ -89,7 +89,7 @@ export default function RitualsRow() {
                   Bundle items you buy together
                 </p>
               </div>
-            </button>
+            </Link>
           </div>
         </div>
 
