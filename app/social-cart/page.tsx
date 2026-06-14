@@ -79,11 +79,10 @@ export default function SocialCartPage() {
                 <button
                   key={emoji}
                   onClick={() => setSelectedEmoji(emoji)}
-                  className={`w-11 h-11 rounded-xl text-2xl transition-all ${
-                    selectedEmoji === emoji
+                  className={`w-11 h-11 rounded-xl text-2xl transition-all ${selectedEmoji === emoji
                       ? 'bg-[#00838F] scale-110 shadow-md'
                       : 'bg-gray-50 hover:bg-gray-100'
-                  }`}
+                    }`}
                 >
                   {emoji}
                 </button>
@@ -142,7 +141,7 @@ export default function SocialCartPage() {
         <div className="mt-8 grid grid-cols-3 gap-3 text-center">
           {[
             { icon: '⚡', title: 'Real-time', desc: 'Everyone sees updates instantly' },
-            { icon: '🛡️', title: 'Nia Protected', desc: 'AI checks for allergy conflicts' },
+            { icon: '🛡️', title: 'Nia Protected', desc: 'AI checks for conflicts like allergies and more' },
             { icon: '🔗', title: 'Easy Share', desc: 'Just send a link — no sign-up needed' },
           ].map((f) => (
             <div key={f.title} className="bg-white rounded-2xl border border-gray-100 p-3 shadow-sm">

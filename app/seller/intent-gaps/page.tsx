@@ -123,7 +123,16 @@ function IntentGapRow({ gap, isExpanded, onToggle }: { gap: IntentGap, isExpande
 
 export default function IntentGapsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [sortByCategory, setSortByCategory] = useState(false);
   const summary = getIntentGapSummary();
+
+  const sortedGaps = sortByCategory
+    ? [...intentGaps].sort((a, b) => {
+        const aIsMatch = a.category === summary.sellerCategory ? 0 : 1;
+        const bIsMatch = b.category === summary.sellerCategory ? 0 : 1;
+        return aIsMatch - bIsMatch;
+      })
+    : intentGaps;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
@@ -161,11 +170,22 @@ export default function IntentGapsPage() {
 
         {/* Table/List */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center">
+        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-sm font-bold text-[#0F1111]">Top Intent Gaps ({intentGaps.length})</h2>
+            <button
+              onClick={() => setSortByCategory(prev => !prev)}
+              className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all ${
+                sortByCategory
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                  : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'
+              }`}
+            >
+              <span>🔌</span>
+              {sortByCategory ? `Sorted: ${summary.sellerCategory} first` : `Sort by my category (${summary.sellerCategory})`}
+            </button>
           </div>
           <div className="flex flex-col">
-            {intentGaps.map(gap => (
+            {sortedGaps.map(gap => (
               <IntentGapRow
                 key={gap.id}
                 gap={gap}

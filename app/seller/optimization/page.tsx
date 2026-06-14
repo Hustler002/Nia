@@ -30,31 +30,31 @@ interface ChatMessage {
 
 // ─── Mock listing data (hardcoded per spec — no external imports) ──────────
 const LISTING = {
-  title: 'RiteBite Max Protein Bar - Choco Fudge 70g',
-  category: 'Health & Wellness',
-  price: 125,
-  matchScore: 62,
+  title: 'boAt Airdopes 141 ANC Bluetooth Earbuds',
+  category: 'Electronics',
+  price: 1799,
+  matchScore: 74,
   description:
-    'High protein energy bar with 20g protein. Made with whey protein, dark chocolate coating, and oats. Perfect post-workout snack.',
+    'Active Noise Cancellation earbuds with up to 42 hours total playback, BEAST™ Mode for low-latency gaming, and IPX4 water resistance. Comes with Instacharge (10 min = 75 min playback).',
   attributes: [
-    { label: 'Protein', value: '20g' },
-    { label: 'Flavour', value: 'Choco Fudge' },
-    { label: 'Weight', value: '70g' },
-    { label: 'Diet Type', value: 'Vegetarian' },
+    { label: 'Connectivity', value: 'Bluetooth 5.2' },
+    { label: 'Battery Life', value: '6hr + 36hr case' },
+    { label: 'ANC', value: 'Yes (up to -23dB)' },
+    { label: 'Water Rating', value: 'IPX4' },
   ],
 };
 
 const SEARCH_QUERIES = [
-  { query: 'sugar-free protein bar under ₹300', volume: '1,247' },
-  { query: 'diabetic friendly protein bar', volume: '890' },
-  { query: 'low sugar high protein snack', volume: '645' },
+  { query: 'noise cancelling earbuds under ₹1500', volume: '2,100' },
+  { query: 'ANC wireless earbuds budget India', volume: '1,340' },
+  { query: 'best ANC earbuds under 2000 gaming', volume: '890' },
 ];
 
 const IMPROVEMENTS = [
-  "Add 'sugar-free' to product title",
-  "Include 'diabetic friendly' in search tags",
-  'Add protein content (grams) to attributes',
-  "Mention 'gym snack' in description",
+  "Add 'under ₹2000' price anchor to product title",
+  "Include 'ANC' and 'noise cancelling' in search tags",
+  'Add decibel reduction spec (-23dB) to attributes',
+  "Mention 'BEAST Mode gaming' and 'low latency' in description",
 ];
 
 const QUICK_CHIPS = [
@@ -69,7 +69,7 @@ const SEED_MESSAGES: ChatMessage[] = [
     id: 'seed-1',
     role: 'nia',
     content:
-      "Hi! I see you're looking at your Health & Wellness listings. This week, **1,247 customers** searched for 'sugar-free protein bar under ₹300' and couldn't find a match. Your RiteBite bar is close but isn't showing up because the title doesn't include 'sugar-free'. Let me help fix that!",
+      "Hi! I see you're looking at your Electronics listings. This week, **2,100 customers** searched for 'noise cancelling earbuds under ₹1500' and couldn't find a match. Your boAt Airdopes 141 ANC is a strong fit, but it's priced at ₹1,799 and the title doesn't include 'noise cancelling' or 'ANC' prominently. Let me help fix that!",
   },
   {
     id: 'seed-2',
@@ -77,9 +77,9 @@ const SEED_MESSAGES: ChatMessage[] = [
     content: '', // content lives in the suggestion card
     suggestion: {
       header: 'Suggested Title Rewrite',
-      before: 'RiteBite Max Protein Bar - Choco Fudge 70g',
+      before: 'boAt Airdopes 141 ANC Bluetooth Earbuds',
       after:
-        'RiteBite Max Protein Bar - Sugar Free Choco Fudge 70g | Diabetic Friendly | 20g Protein',
+        'boAt Airdopes 141 ANC | Noise Cancelling Earbuds | 42Hr Battery | BEAST Mode Gaming | IPX4',
       buttonLabel: 'Apply this title',
     },
   },
@@ -87,7 +87,7 @@ const SEED_MESSAGES: ChatMessage[] = [
     id: 'seed-3',
     role: 'nia',
     content:
-      "I'd also suggest adding these search tags: 'sugar-free', 'diabetic friendly', 'gym snack', 'keto snack', 'high protein low sugar'. Want me to update them?",
+      "I'd also suggest adding these search tags: 'ANC earbuds', 'noise cancelling wireless', 'gaming earbuds low latency', 'budget ANC under 2000', 'IPX4 earbuds'. Want me to update them?",
   },
 ];
 
@@ -96,19 +96,19 @@ function getMockResponse(userMsg: string): string {
   const lower = userMsg.toLowerCase();
 
   if (lower.includes('description')) {
-    return `Here's an optimized description:\n\n"RiteBite Max Protein Bar — your guilt-free, **sugar-free** post-workout snack packed with **20g whey protein**. Diabetic-friendly with a rich dark chocolate coating and wholesome oats. Perfect for gym-goers, keto dieters, and anyone craving a high-protein, low-sugar treat. Available in Choco Fudge flavour — grab yours under ₹300!"\n\nThis version targets 3 high-volume search queries and adds keywords customers are actually searching for.`;
+    return `Here's an optimized description:\n\n"boAt Airdopes 141 ANC — premium **noise cancelling earbuds** built for India's everyday commuter and gamer. Enjoy up to **42 hours of total playback** with Instacharge (10 min = 75 min). BEAST™ Mode ensures **ultra-low latency gaming**. IPX4 water resistant. Compatible with Alexa and all Bluetooth 5.2 devices. Under ₹2000 — the best ANC earbuds for the price!"\n\nThis version targets 3 high-volume search queries and adds keywords customers are actually searching for.`;
   }
 
   if (lower.includes('tag')) {
-    return `Based on current search trends, here are the **top recommended tags** for your listing:\n\n• sugar-free protein bar\n• diabetic friendly snack\n• gym snack India\n• keto protein bar\n• high protein low sugar\n• post-workout snack\n• whey protein bar\n• healthy snack under 300\n\nAdding these could capture an estimated **2,780+ additional searches/week**.`;
+    return `Based on current search trends, here are the **top recommended tags** for your listing:\n\n• noise cancelling earbuds\n• ANC earbuds budget\n• gaming earbuds low latency\n• best earbuds under 2000\n• BEAST mode earphones\n• IPX4 wireless earbuds\n• earbuds 42 hour battery\n• Bluetooth 5.2 earbuds India\n\nAdding these could capture an estimated **3,440+ additional searches/week**.`;
   }
 
   if (lower.includes('competitor')) {
-    return `**Competitor Snapshot — Protein Bars (₹100-₹200)**\n\n🥇 **Yoga Bar** — 4.3★, ₹99, ranks #1 for 'sugar-free protein bar'. Uses 'sugar-free' and 'diabetic safe' in title.\n\n🥈 **MuscleBlaze** — 4.1★, ₹145, ranks #2. Has 12 search tags vs. your 4.\n\n🥉 **Your Listing (RiteBite)** — 4.0★, ₹125, ranks #7. Missing 'sugar-free' keyword entirely.\n\nKey gap: Top competitors average **10 search tags** — you have 4. Adding 6 more targeted tags could move you to the top 3.`;
+    return `**Competitor Snapshot — ANC Earbuds (₹1000-₹2500)**\n\n🥇 **realme Buds Air 5 Pro** — 4.4★, ₹2,499, ranks #1 for 'ANC earbuds budget'. Title explicitly mentions 'Active Noise Cancellation' + '50dB ANC'.\n\n🥈 **Nothing Ear (2)** — 4.3★, ₹8,999, ranks #2 for premium. Too expensive for your audience.\n\n🥉 **Your Listing (boAt Airdopes 141)** — 4.1★, ₹1,799, ranks #6. Missing 'noise cancelling' in title entirely, and only 5 search tags vs top competitors averaging 12.\n\nKey gap: Adding 'ANC' and 'noise cancelling' to your title alone could move you from rank #6 to top 3.`;
   }
 
   // Default catch-all
-  return `Great question! Based on the intent gap data I'm seeing, your listing has strong fundamentals but is missing some key search terms. The biggest opportunity is around "sugar-free" and "diabetic friendly" — these queries have high volume but your listing doesn't surface for them.\n\nWould you like me to rewrite your description, suggest better tags, or show a competitor analysis?`;
+  return `Great question! Based on the intent gap data I'm seeing, your listing has strong fundamentals but is missing some key search terms. The biggest opportunity is around "noise cancelling" and "ANC" — these queries have high volume (2,100+ searches/week) but your listing doesn't surface for them.\n\nWould you like me to rewrite your description, suggest better tags, or show a competitor analysis?`;
 }
 
 // ─── Markdown-light renderer (bold only, no external deps) ─────────────────
@@ -216,7 +216,7 @@ export default function SellerOptimizationPage() {
         <div className="space-y-3">
           <h3 className="font-semibold text-base" style={{ color: DARK }}>
             {appliedTitle
-              ? 'RiteBite Max Protein Bar - Sugar Free Choco Fudge 70g | Diabetic Friendly | 20g Protein'
+              ? 'boAt Airdopes 141 ANC | Noise Cancelling Earbuds | 42Hr Battery | BEAST Mode Gaming | IPX4'
               : LISTING.title}
           </h3>
           <div className="flex items-center gap-3 text-sm text-gray-500">
