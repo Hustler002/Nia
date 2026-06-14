@@ -3,8 +3,9 @@ import { NiaMessage } from '@/lib/useNiaStore';
 import { TOOL_DEFINITIONS } from '@/lib/niaBrain/tools';
 import { executeMockTool } from '@/lib/niaBrain/mockTools';
 import { detectEmergencyCategory } from '@/lib/emergency/categories';
-
 import { NIA_SYSTEM_PROMPT } from '@/lib/niaBrain/systemPrompt';
+import { fetchMemoryContext, extractAndSaveMemories, resolveAddress } from '@/lib/memoryEngine';
+import { CATALOG } from '@/lib/catalog/products';
 
 function matchMockFlow(userMessage: string): NiaMessage | null {
   const lowerMsg = userMessage.toLowerCase();
@@ -125,30 +126,35 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
 
 export async function POST(req: Request) {
   // 1. Parse and validate request body
-  const { messages, userId, pincode } = await req.json();
+  const { messages, userId, userName, pincode } = await req.json();
   const latestUserMessage = messages.filter((m: any) => m.role === 'user').at(-1)?.content ?? "";
   
   // 2. Mock-first: check demo flows
   const mockResponse = matchMockFlow(latestUserMessage);
   if (mockResponse) {
-    // Simulate thinking time for realism (remove in production)
     await new Promise(resolve => setTimeout(resolve, 1200));
     return Response.json(mockResponse);
   }
   
-  // 3. Live Groq agent loop
+  // 3. Fetch persistent AI memory for this user
+  const memoryContext = userId ? await fetchMemoryContext(userId) : '';
+  const systemPromptWithMemory = memoryContext
+    ? `${NIA_SYSTEM_PROMPT}\n\nThe user's name is ${userName || 'Guest'}.\n\n${memoryContext}`
+    : `${NIA_SYSTEM_PROMPT}\n\nThe user's name is ${userName || 'Guest'}.`;
+
+  // 4. Live Groq agent loop
   try {
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
     
     // Build conversation history in OpenAI format
     const groqMessages: any[] = [
-      { role: "system", content: NIA_SYSTEM_PROMPT },
+      { role: "system", content: systemPromptWithMemory },
       ...messages.map((m: any) => ({ role: m.role === 'nia' ? 'assistant' : 'user', content: m.content }))
     ];
     
     // First call — tool selection
     const firstResponse = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "llama-3.1-8b-instant",
       messages: groqMessages,
       tools: TOOL_DEFINITIONS,
       tool_choice: "auto",
@@ -163,7 +169,33 @@ export async function POST(req: Request) {
       const toolCall = firstMessage.tool_calls[0];
       const toolName = toolCall.function.name;
       const toolArgs = JSON.parse(toolCall.function.arguments);
-      
+      // ─── Handle checkout_direct autonomously ──────────────────────
+      if (toolName === 'checkout_direct') {
+        const { item_query, address_label, quantity = 1 } = toolArgs;
+        
+        // Find product in catalog
+        const product = CATALOG.find(
+          (p) => p.name.toLowerCase().includes(item_query.toLowerCase()) ||
+                 item_query.toLowerCase().includes(p.name.toLowerCase().split(' ')[0])
+        );
+
+        // Resolve saved address
+        const address = userId ? await resolveAddress(userId, address_label) : null;
+        
+        return Response.json({
+          id: 'checkout-' + Date.now(),
+          role: 'nia',
+          type: 'direct_checkout',
+          content: `Got it! Sending ${quantity}x ${product?.name || item_query} to ${address?.label || address_label}. Taking you to payment now... ⚡`,
+          data: {
+            item: product ? { ...product, qty: quantity } : { id: 'custom', name: item_query, price: 89, mrp: 99, image: '📦', qty: quantity, category: 'Other' },
+            address: address || { label: address_label, full_address: `${address_label} (saved address)`, pincode: pincode || '110001' },
+          },
+          timestamp: new Date(),
+        });
+      }
+      // ─────────────────────────────────────────────────────────────
+
       // Inject user context into tool args where relevant
       if (toolName === 'get_user_profile' && !toolArgs.user_id) {
         toolArgs.user_id = userId || 'demo-user-001';
@@ -174,13 +206,13 @@ export async function POST(req: Request) {
       if (toolName === 'generate_emergency_kit' && !toolArgs.pincode) {
         toolArgs.pincode = pincode || '110001';
       }
-      
-      // Execute mock tool
-      const toolResult = await executeMockTool(toolName, toolArgs);
+
+      // Execute other mock tools normally
+      const toolResult = await executeMockTool(toolName, toolArgs, userId, userName);
       
       // Second call — final response with tool result
       const secondResponse = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant",
         messages: [
           ...groqMessages,
           { role: "assistant", content: null, tool_calls: firstMessage.tool_calls },
@@ -191,12 +223,24 @@ export async function POST(req: Request) {
       });
       
       const rawText = secondResponse.choices[0].message.content ?? "";
-      return Response.json(parseNiaResponse(rawText));
+      const parsed = parseNiaResponse(rawText);
+
+      // Extract + save memories in background (non-blocking)
+      if (userId) {
+        extractAndSaveMemories(userId, latestUserMessage, rawText).catch(() => {});
+      }
+      return Response.json(parsed);
     }
     
     // No tool call — parse direct response
     const rawText = firstMessage.content ?? "";
-    return Response.json(parseNiaResponse(rawText));
+    const parsed = parseNiaResponse(rawText);
+    
+    // Extract + save memories in background (non-blocking)
+    if (userId) {
+      extractAndSaveMemories(userId, latestUserMessage, rawText).catch(() => {});
+    }
+    return Response.json(parsed);
     
   } catch (error: any) {
     console.error("Nia API error:", error?.message || error);
@@ -244,7 +288,7 @@ function parseNiaResponse(raw: string): Partial<NiaMessage> {
         name: item.name,
         price: item.price,
         mrp: item.mrp || item.price,
-        image: item.imageUrl || '🛒',
+        image: item.imageUrl || item.image || '🛒',
         qty: 1,
         category: item.category || 'General',
         rating: item.rating || undefined,
@@ -252,6 +296,21 @@ function parseNiaResponse(raw: string): Partial<NiaMessage> {
         matchReason: item.matchReason || undefined,
         brand: item.brand || undefined,
       }));
+    }
+    // If data has an items key (from build_cart result object)
+    if (data && !Array.isArray(data) && Array.isArray(data.items)) {
+      data = data.items.map((item: any) => {
+        const p = item.product || item;
+        return {
+          id: p.id || String(Math.random()),
+          name: p.name || 'Unknown',
+          price: p.price || 0,
+          mrp: p.mrp || p.price || 0,
+          image: p.imageUrl || p.image || '🛒',
+          qty: item.quantity || item.qty || 1,
+          category: p.category || 'General',
+        };
+      });
     }
     
     return {

@@ -65,7 +65,8 @@ export type NiaMessageType =
   | 'comparison'
   | 'cart_summary'
   | 'emergency_kit'
-  | 'reorder_nudge';
+  | 'reorder_nudge'
+  | 'direct_checkout';
 
 export interface NiaMessage {
   id: string;

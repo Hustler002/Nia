@@ -15,9 +15,11 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
   const { addToCart } = useNiaChatStore();
   const [addedAll, setAddedAll] = useState(false);
 
+  const validItems = Array.isArray(items) ? items : [];
+
   // Local qty state — cloned from props so user edits don't mutate upstream data
   const [quantities, setQuantities] = useState<Record<string, number>>(() =>
-    Object.fromEntries(items.map((item) => [item.id, item.qty]))
+    Object.fromEntries(validItems.map((item) => [item.id, item.qty]))
   );
 
   const updateQty = useCallback((id: string, delta: number) => {
@@ -29,7 +31,7 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
   }, []);
 
   const handleAddAll = () => {
-    items.forEach(item => {
+    validItems.forEach(item => {
       addToCart({ ...item, qty: quantities[item.id] ?? item.qty });
     });
     setAddedAll(true);
@@ -38,12 +40,8 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
 
   // Derived running total recomputed only when quantities change
   const total = useMemo(
-    () =>
-      items.reduce(
-        (sum, item) => sum + item.price * (quantities[item.id] ?? item.qty),
-        0
-      ),
-    [items, quantities]
+    () => validItems.reduce((acc, item) => acc + item.price * (quantities[item.id] ?? item.qty), 0),
+    [validItems, quantities]
   );
 
   return (
@@ -62,7 +60,10 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
 
       {/* ── Item list ─────────────────────────────────────────────────── */}
       <ul className="flex flex-col gap-2 px-4">
-        {items.map((item) => (
+        {validItems.length === 0 && (
+          <li className="text-sm text-gray-500 italic p-2 text-center">No items found.</li>
+        )}
+        {validItems.map((item) => (
           <li
             key={item.id}
             className="

@@ -138,5 +138,31 @@ export const TOOL_DEFINITIONS = [
         required: ["category", "pincode"]
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "checkout_direct",
+      description: "Use ONLY when the user explicitly says to deliver/order/send something directly. Triggers immediate checkout to a saved address. Examples: 'deliver milk to mom', 'order bread to my home', 'send chips to office'.",
+      parameters: {
+        type: "object",
+        properties: {
+          item_query: { 
+            type: "string",
+            description: "The product the user wants to order, e.g. '1L milk', 'Britannia bread'"
+          },
+          address_label: { 
+            type: "string",
+            description: "The saved address label the user mentioned, e.g. 'mom', 'home', 'office'"
+          },
+          quantity: { 
+            type: "number",
+            description: "How many units to order. Default 1."
+          }
+        },
+        required: ["item_query", "address_label"]
+      }
+    }
   }
 ];
+

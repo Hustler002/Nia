@@ -10,6 +10,7 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 import { useNiaChatStore } from '@/lib/useNiaStore';
 import type { NiaMessage } from '@/lib/useNiaStore';
+import { useUser } from '@clerk/nextjs';
 
 // Lazy-loaded card renderers
 import CartSummaryCard from './cards/CartSummaryCard';
@@ -142,6 +143,7 @@ function TypingIndicator() {
 export default function NiaPanel() {
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useUser();
   const {
     isOpen,
     close,
@@ -217,7 +219,8 @@ export default function NiaPanel() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             messages: currentMessages,
-            userId: 'demo-user-001',
+            userId: user?.id ?? 'guest',
+            userName: user?.firstName ?? user?.fullName ?? 'Guest',
             pincode: '110001',
           }),
         });
@@ -246,8 +249,20 @@ export default function NiaPanel() {
           }
           
           // ALWAYS update the "Suggested" grid if the AI returns any product array
-          // Sometimes the LLM uses type 'text' but still includes the data, so we check data presence instead.
           useNiaChatStore.getState().setRelatedProducts(niaMsg.data);
+        }
+
+        // --- Autonomous Checkout (direct_checkout tool result) ---
+        if (niaMsg.type === 'direct_checkout' && niaMsg.data && !Array.isArray(niaMsg.data)) {
+          const checkoutData = niaMsg.data as any;
+          if (checkoutData.item) {
+            useNiaChatStore.getState().addToCart(checkoutData.item);
+          }
+          const addressLabel = checkoutData.address?.label || 'home';
+          // Small delay so user can read Nia's message, then redirect
+          setTimeout(() => {
+            router.push(`/payment?address=${encodeURIComponent(addressLabel)}`);
+          }, 1500);
         }
 
         // Update quick chips from response if available
