@@ -1,33 +1,38 @@
 // components/NiaFab.tsx
-// Floating action button to toggle Nia chat panel (visible on desktop)
-// Hidden on mobile since TopBar has the toggle button
-// Production: add unread notification badge, haptic feedback
+// Legacy FAB component — kept for backward compat but not used in the current layout
+// The NiaTrigger component in NiaWidget/ is the active trigger button.
 
 'use client';
 
-import { useNiaStore } from '@/lib/useNiaStore';
+import { useNiaChatStore } from '@/lib/useNiaStore';
 
-export default function NiaFab() {
-  const { isOpen, toggleNia } = useNiaStore();
-
-  if (isOpen) return null;
+export function NiaFab() {
+  const { isOpen, toggle, hasProactiveNudge } = useNiaChatStore();
 
   return (
     <button
-      onClick={toggleNia}
-      className="fixed bottom-6 right-6 z-[997] hidden sm:flex w-14 h-14 rounded-full bg-[#00838F] hover:bg-[#006d75] text-white shadow-lg hover:shadow-xl items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 group"
-      aria-label="Open Nia assistant"
+      onClick={toggle}
+      className={`fixed bottom-6 right-6 z-[99] w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
+        isOpen
+          ? 'bg-gray-700 rotate-45'
+          : 'bg-gradient-to-br from-orange-500 to-amber-500 nia-fab-pulse'
+      }`}
+      aria-label={isOpen ? 'Close Nia' : 'Open Nia'}
     >
-      {/* Nia icon */}
-      <span className="text-lg font-bold group-hover:scale-110 transition-transform">N</span>
-
-      {/* Pulse ring */}
-      <div className="absolute inset-0 rounded-full bg-[#00838F]/30 animate-nia-pulse" />
-
-      {/* Tooltip */}
-      <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-[#0F1111] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-        Ask Nia anything ✨
-      </div>
+      {isOpen ? (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+      ) : (
+        <>
+          <span className="text-2xl">✨</span>
+          {hasProactiveNudge && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center">
+              <span className="text-[8px] text-white font-bold">!</span>
+            </span>
+          )}
+        </>
+      )}
     </button>
   );
 }

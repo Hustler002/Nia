@@ -9,10 +9,10 @@ import { useEffect, useState } from 'react';
 import RitualCard from './RitualCard';
 import { rituals } from '@/lib/mockData';
 import { detectRituals } from '@/lib/ritualsEngine';
-import { useUser } from '@clerk/nextjs';
+import { useUserStore } from '@/lib/stores/useUserStore';
 
 export default function RitualRow() {
-  const { user } = useUser();
+  const user = useUserStore((s) => s.user);
   const [items, setItems] = useState(rituals); // start with mock
   const [isLive, setIsLive] = useState(false);
 

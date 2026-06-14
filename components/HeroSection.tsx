@@ -1,16 +1,34 @@
 // components/HeroSection.tsx
 // Main hero with the Nia conversational input bar
-// The input bar is the centerpiece — clicking it opens the Nia chat panel
-// Production: submit fires a Bedrock Agent invocation via API route
+// Uses useNiaChatStore (Zustand) for all Nia interactions
 
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useNiaStore } from '@/lib/useNiaStore';
-import { heroPlaceholders, quickStartChips } from '@/lib/mockData';
+import { useRouter } from 'next/navigation';
+import { useNiaChatStore } from '@/lib/useNiaStore';
+import { useUserStore } from '@/lib/stores/useUserStore';
+
+const heroPlaceholders = [
+  '"Movie night for 4 under ₹500"',
+  '"Best earbuds under ₹2000"',
+  '"I have a fever — need medicine fast"',
+  '"Weekly groceries for 2 under ₹1500"',
+  '"Birthday party for 10 kids"',
+];
+
+const quickStartChips = [
+  { label: '🎬 Movie night', query: 'Movie night for 4 under ₹500' },
+  { label: '🎂 Party kit', query: 'Birthday party for 10 kids' },
+  { label: '🚨 Emergency', href: '/emergency' },
+  { label: '🍳 Sunday brunch', query: 'Sunday brunch essentials for family' },
+  { label: '💪 Gym fuel', query: 'Post-workout protein snacks under ₹300' },
+];
 
 export default function HeroSection() {
-  const { openNia } = useNiaStore();
+  const router = useRouter();
+  const { open: openNia, sendMessage } = useNiaChatStore();
+  const { user } = useUserStore();
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [isFading, setIsFading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -32,7 +50,19 @@ export default function HeroSection() {
     e.preventDefault();
     if (inputValue.trim()) {
       openNia(inputValue.trim());
+      sendMessage(inputValue.trim(), user?.id, user?.pincode);
       setInputValue('');
+    }
+  };
+
+  const handleChipClick = (chip: typeof quickStartChips[0]) => {
+    if (chip.href) {
+      router.push(chip.href);
+      return;
+    }
+    if (chip.query) {
+      openNia(chip.query);
+      sendMessage(chip.query, user?.id, user?.pincode);
     }
   };
 
@@ -54,6 +84,15 @@ export default function HeroSection() {
       <div className="absolute bottom-12 left-[20%] w-2.5 h-2.5 rounded-full bg-[#00838F]/15 animate-float-fast" />
 
       <div className="relative max-w-2xl mx-auto text-center">
+        {/* Greeting */}
+        {user && (
+          <div className="mb-2">
+            <span className="text-sm text-gray-400">
+              Hi {user.name.split(' ')[0]}! 👋
+            </span>
+          </div>
+        )}
+
         {/* Headline */}
         <h1 className="text-3xl sm:text-5xl font-bold text-[#0F1111] mb-3 tracking-tight">
           Tell <span className="text-[#00838F]">Nia</span> what you need.
@@ -88,18 +127,6 @@ export default function HeroSection() {
               id="nia-hero-input"
             />
 
-            {/* Mic button */}
-            <button
-              type="button"
-              onClick={() => openNia()}
-              className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-              aria-label="Voice input"
-            >
-              <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-              </svg>
-            </button>
-
             {/* Submit button */}
             <button
               type="submit"
@@ -118,7 +145,7 @@ export default function HeroSection() {
           {quickStartChips.map((chip) => (
             <button
               key={chip.label}
-              onClick={() => openNia(chip.query)}
+              onClick={() => handleChipClick(chip)}
               className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:border-[#00838F] hover:text-[#00838F] hover:shadow-md transition-all duration-200"
             >
               {chip.label}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import TopBar from "@/components/TopBar";
 import HeroSection from "@/components/HeroSection";
 import EmergencyBanner from "@/components/EmergencyBanner";
@@ -22,7 +23,7 @@ export default function HomePage() {
 
         {/* 👥 Social / Group Cart CTA */}
         <section className="max-w-7xl mx-auto px-4 py-4">
-          <a
+          <Link
             href="/social-cart"
             className="group flex items-center gap-4 w-full rounded-2xl bg-gradient-to-r from-[#00838F] to-[#006d75] p-4 hover:from-[#006d75] hover:to-[#005a5f] transition-all shadow-md shadow-[#00838F]/10 hover:shadow-lg hover:shadow-[#00838F]/20"
           >
@@ -38,7 +39,7 @@ export default function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
-          </a>
+          </Link>
         </section>
 
         {/* 🆕 Manual product browser + live cart */}
