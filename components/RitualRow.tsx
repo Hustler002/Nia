@@ -24,7 +24,7 @@ export default function RitualRow() {
         const mapped = liveRituals.map((r) => ({
           id: r.id,
           name: r.name,
-          description: `You order this every ~${r.frequencyDays} days`,
+          description: `You order this every ~${(r as any).frequencyDays ?? r.lastOrderedDaysAgo ?? 7} days`,
           emoji: r.items[0]?.image || '⚡',
           items: r.items.map((item: any) => ({
             id: item.id,
@@ -37,7 +37,7 @@ export default function RitualRow() {
           })),
           totalPrice: r.totalPrice,
           savings: 0,
-          frequency: `Every ${r.frequencyDays} days`,
+          frequency: `Every ${(r as any).frequencyDays ?? r.lastOrderedDaysAgo ?? 7} days`,
         }));
         setItems(mapped as any);
         setIsLive(true);
