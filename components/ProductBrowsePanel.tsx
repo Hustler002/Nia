@@ -25,6 +25,7 @@ export default function ProductBrowsePanel() {
   const router = useRouter();
   const [cartOpen, setCartOpen] = useState(false);
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Determine what to show in the grid
   let filtered = CATALOG;
@@ -34,6 +35,10 @@ export default function ProductBrowsePanel() {
   } else if (browseCategory !== 'All') {
     filtered = CATALOG.filter(p => p.category === browseCategory);
   }
+
+  // Limit visible items to 2 rows: 8 on desktop (4 cols+), 4 on mobile (2 cols)
+  const INITIAL_VISIBLE = 8;
+  const visibleProducts = isExpanded ? filtered : filtered.slice(0, INITIAL_VISIBLE);
 
   // Dynamic categories array — inject "Suggested" if there's an active query
   const dynamicCategories = [...CATEGORIES];
@@ -108,7 +113,7 @@ export default function ProductBrowsePanel() {
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           <AnimatePresence mode="popLayout">
-            {filtered.map((product) => {
+            {visibleProducts.map((product) => {
               const qty = cartQty(product.id);
               const justAdded = addedId === product.id;
               const discount = product.mrp > product.price
@@ -192,6 +197,16 @@ export default function ProductBrowsePanel() {
             })}
           </AnimatePresence>
         </div>
+
+        {/* Show more / Show less toggle */}
+        {filtered.length > INITIAL_VISIBLE && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-[#007185] hover:text-[#C7511F] hover:underline text-sm font-medium mt-4 block text-center cursor-pointer w-full"
+          >
+            {isExpanded ? `Show less ▲` : `Show more (${filtered.length - INITIAL_VISIBLE} more items) ▼`}
+          </button>
+        )}
       </div>
 
       {/* ── Floating Cart Bar (appears when cart has items) ── */}

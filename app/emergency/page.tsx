@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { EMERGENCY_CATEGORIES, EmergencyCategory, detectEmergencyCategory } from '@/lib/emergency/categories';
 import { useNiaChatStore } from '@/lib/useNiaStore';
@@ -13,6 +13,21 @@ export default function EmergencyPage() {
   const [selectedCategory, setSelectedCategory] = useState<EmergencyCategory | null>(null);
   const selectedRef = useRef<HTMLDivElement>(null);
   const customTileRef = useRef<CustomEmergencyTileHandle>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Hysteresis scroll listener — two thresholds prevent bounce
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 90) {
+        setIsScrolled(true);
+      } else if (window.scrollY < 40) {
+        setIsScrolled(false);
+      }
+      // Between 40–90: no change (dead zone prevents thrashing)
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Search only runs on explicit submit
   const handleSearch = (e: React.FormEvent) => {
@@ -34,42 +49,70 @@ export default function EmergencyPage() {
 
   return (
     <div className="min-h-screen bg-[#EAEDED] pb-24">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-red-500 to-orange-500 pt-12 pb-8 px-4 sm:px-8 shadow-md text-white sticky top-0 z-20">
-        <div className="max-w-4xl mx-auto">
-          <a
-            href="/"
-            className="inline-flex items-center gap-1.5 text-white/80 hover:text-white text-sm font-medium mb-3 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-            Back to Home
-          </a>
-          <h1 className="text-3xl sm:text-4xl font-extrabold mb-2 tracking-tight">🚨 What&apos;s the emergency?</h1>
-          <p className="text-red-100 text-lg mb-6 opacity-90">Tell us or tap below — assembled kit + order in 60 seconds</p>
-          
-          <form onSubmit={handleSearch} className="relative hidden md:flex">
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder="Describe your emergency... (e.g. 'my baby has rash')"
-              className="flex-1 h-12 bg-white text-gray-900 placeholder-gray-500 px-5 text-lg outline-none font-medium rounded-l-md rounded-r-none border border-r-0 border-[#D5D9D9] focus:ring-2 focus:ring-[#FF9900] focus:border-transparent transition-all"
-            />
-            <button
-              type="submit"
-              aria-label="Search"
-              className="h-12 w-14 flex items-center justify-center bg-[#FFA41C] hover:bg-[#FA8900] rounded-r-md rounded-l-none transition-colors flex-shrink-0"
+      {/* Header — sticky, collapses subtitle on scroll, search always visible */}
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-red-500 to-orange-500 shadow-md text-white">
+        <div
+          className="px-4 sm:px-8 overflow-hidden transition-all duration-300 ease-in-out"
+          style={{
+            paddingTop: isScrolled ? '10px' : '48px',
+            paddingBottom: isScrolled ? '10px' : '32px',
+          }}
+        >
+          <div className="max-w-4xl mx-auto">
+            {/* Row 1: Back + Title (always visible) */}
+            <div className={`flex items-center gap-3 transition-all duration-300 ${isScrolled ? 'mb-2' : 'mb-1'}`}>
+              <a
+                href="/"
+                className="inline-flex items-center gap-1 text-white/80 hover:text-white text-sm font-medium transition-colors flex-shrink-0"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+                <span className={`transition-all duration-300 ${isScrolled ? 'hidden sm:inline' : ''}`}>Back</span>
+              </a>
+              <h1
+                className="font-extrabold tracking-tight transition-all duration-300"
+                style={{
+                  fontSize: isScrolled ? '1.1rem' : '2.25rem',
+                  lineHeight: isScrolled ? '1.5rem' : '2.5rem',
+                }}
+              >🚨 What&apos;s the emergency?</h1>
+            </div>
+
+            {/* Row 2: Subtitle — collapses smoothly with max-height */}
+            <div
+              className="overflow-hidden transition-all duration-300 ease-in-out"
+              style={{
+                maxHeight: isScrolled ? '0px' : '50px',
+                opacity: isScrolled ? 0 : 0.9,
+                marginBottom: isScrolled ? '0px' : '16px',
+              }}
             >
-              {/* Search magnifying glass icon */}
-              <svg className="w-5 h-5 text-[#0F1111]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-              </svg>
-            </button>
-          </form>
+              <p className="text-red-100 text-lg">Tell us or tap below — assembled kit + order in 60 seconds</p>
+            </div>
+
+            {/* Row 3: Search bar — always visible, fixed height */}
+            <form onSubmit={handleSearch} className={`relative hidden md:flex transition-all duration-300 ${isScrolled ? '' : ''}`}>
+              <input
+                type="text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder="Describe your emergency... (e.g. 'my baby has rash')"
+                className="flex-1 h-11 bg-white text-gray-900 placeholder-gray-500 px-5 text-base outline-none font-medium rounded-l-md rounded-r-none border border-r-0 border-[#D5D9D9] focus:ring-2 focus:ring-[#FF9900] focus:border-transparent"
+              />
+              <button
+                type="submit"
+                aria-label="Search"
+                className="h-11 w-14 flex items-center justify-center bg-[#FFA41C] hover:bg-[#FA8900] rounded-r-md rounded-l-none transition-colors flex-shrink-0"
+              >
+                <svg className="w-5 h-5 text-[#0F1111]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
+      </header>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-8 mt-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
