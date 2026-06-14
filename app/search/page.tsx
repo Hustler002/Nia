@@ -2,7 +2,6 @@
 
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import TopBar from "@/components/TopBar";
 import ProductBrowsePanel from "@/components/ProductBrowsePanel";
 import { useNiaChatStore } from "@/lib/useNiaStore";
 
@@ -13,7 +12,6 @@ function SearchPageContent() {
 
   return (
     <>
-      <TopBar />
       <main className="flex-1 bg-gray-50 min-h-screen pt-4">
         <div className="max-w-7xl mx-auto px-4 pb-4">
           <h1 className="text-2xl font-bold text-[#0F1111]">

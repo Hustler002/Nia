@@ -1,5 +1,5 @@
 import { Groq } from 'groq-sdk';
-import { NiaMessage } from '@/lib/useNiaStore';
+import type { NiaMessage } from '@/types';
 import { TOOL_DEFINITIONS } from '@/lib/niaBrain/tools';
 import { executeMockTool } from '@/lib/niaBrain/mockTools';
 import { detectEmergencyCategory } from '@/lib/emergency/categories';
