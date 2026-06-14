@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNiaChatStore } from '@/lib/useNiaStore';
 import { CATALOG } from '@/lib/catalog/products';
@@ -21,6 +22,7 @@ const CATEGORIES = [
 
 export default function ProductBrowsePanel() {
   const { liveCart, browseCategory, addToCart, removeFromCart, updateQty, clearCart, setBrowseCategory, open, relatedProducts, activeQuery } = useNiaChatStore();
+  const router = useRouter();
   const [cartOpen, setCartOpen] = useState(false);
   const [addedId, setAddedId] = useState<string | null>(null);
 
@@ -302,7 +304,10 @@ export default function ProductBrowsePanel() {
                     <p className="text-xs text-gray-400">arrives in ~10 min</p>
                   </div>
                 </div>
-                <button className="w-full bg-[#FF9900] hover:bg-[#f08900] text-[#0F1111] font-bold py-4 rounded-2xl transition-all shadow-lg hover:shadow-xl text-sm">
+                <button
+                  onClick={() => { setCartOpen(false); router.push('/payment'); }}
+                  className="w-full bg-[#FF9900] hover:bg-[#f08900] text-[#0F1111] font-bold py-4 rounded-2xl transition-all shadow-lg hover:shadow-xl text-sm"
+                >
                   Place Order →
                 </button>
                 <button onClick={clearCart} className="w-full text-xs text-gray-400 hover:text-red-400 transition-colors py-1">

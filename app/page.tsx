@@ -2,7 +2,7 @@ import TopBar from "@/components/TopBar";
 import HeroSection from "@/components/HeroSection";
 import EmergencyBanner from "@/components/EmergencyBanner";
 import ReorderRow from "@/components/ReorderRow";
-import RitualRow from "@/components/RitualRow";
+
 import { RitualsRow } from "@/components/Rituals";
 import CategoryGrid from "@/components/CategoryGrid";
 import ProductBrowsePanel from "@/components/ProductBrowsePanel";
@@ -28,7 +28,6 @@ export default function HomePage() {
 
         {/* Recurring ritual bundles (Module 4B) */}
         <RitualsRow />
-
         {/* Browse by category */}
         <CategoryGrid />
       </main>

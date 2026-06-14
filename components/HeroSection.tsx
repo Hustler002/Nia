@@ -82,7 +82,7 @@ export default function HeroSection() {
               onFocus={handleInputFocus}
               placeholder={heroPlaceholders[placeholderIdx]}
               className={`flex-1 text-base sm:text-lg bg-transparent outline-none text-[#0F1111] placeholder-gray-400 transition-opacity duration-300 ${
-                isFading ? 'opacity-0' : 'opacity-100'
+                isFading && !inputValue ? 'opacity-0' : 'opacity-100'
               }`}
               aria-label="Ask Nia what you need"
               id="nia-hero-input"

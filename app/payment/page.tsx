@@ -19,6 +19,7 @@ function PaymentContent() {
   const { user } = useUser();
   const [placing, setPlacing] = useState(false);
   const [placed, setPlaced] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Read from query params (set by Nia autonomous checkout) or from liveCart
   const addressLabel = searchParams.get('address') || 'Home';
@@ -53,8 +54,7 @@ function PaymentContent() {
       setTimeout(() => router.push('/'), 3000);
     } catch (e) {
       console.error('Order placement error:', e);
-      setPlaced(true); // Still show success UI
-      setTimeout(() => router.push('/'), 3000);
+      setError('Something went wrong placing your order. Please try again.');
     }
     setPlacing(false);
   };
@@ -73,6 +73,28 @@ function PaymentContent() {
         <p className="text-gray-500 text-lg mb-1">Delivering to <strong>{addressLabel}</strong></p>
         <p className="text-[#00838F] font-semibold text-xl">Arriving in ~10 minutes ⚡</p>
         <p className="text-xs text-gray-400 mt-6">Redirecting to home...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-red-50 to-white px-4 text-center">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-7xl mb-6"
+        >
+          😔
+        </motion.div>
+        <h1 className="text-3xl font-bold text-[#0F1111] mb-2">Something went wrong</h1>
+        <p className="text-gray-500 text-lg mb-4">{error}</p>
+        <button
+          onClick={() => { setError(null); }}
+          className="bg-[#00838F] hover:bg-[#006d75] text-white font-bold px-6 py-3 rounded-xl transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }

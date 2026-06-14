@@ -6,11 +6,24 @@
 
 import { useState } from 'react';
 import type { Ritual } from '@/lib/mockData';
+import { useNiaChatStore } from '@/lib/useNiaStore';
 
 export default function RitualCard({ ritual }: { ritual: Ritual }) {
   const [reordered, setReordered] = useState(false);
 
   const handleReorder = () => {
+    // Add all ritual items to cart with mock prices
+    ritual.items.forEach((itemName, idx) => {
+      useNiaChatStore.getState().addToCart({
+        id: `${ritual.id}-item-${idx}`,
+        name: itemName,
+        price: Math.round(ritual.total / ritual.itemCount),
+        mrp: Math.round(ritual.total / ritual.itemCount),
+        image: ritual.emoji,
+        qty: 1,
+        category: 'Ritual',
+      });
+    });
     setReordered(true);
     setTimeout(() => setReordered(false), 2500);
   };
