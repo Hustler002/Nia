@@ -42,9 +42,9 @@ export default function ProductListCard({ items, content }: ProductListCardProps
   return (
     <div
       className="
-        w-full max-w-sm rounded-2xl bg-white
+        w-full max-w-sm rounded-md bg-white
         border-l-4 border-l-[#00838F]
-        shadow-[0_2px_12px_rgba(0,0,0,0.06)]
+        shadow-sm border border-[#D5D9D9]
         overflow-hidden
       "
     >
@@ -71,11 +71,11 @@ export default function ProductListCard({ items, content }: ProductListCardProps
               key={item.id}
               className="
                 min-w-[140px] max-w-[140px] flex-shrink-0
-                bg-white rounded-xl
-                border border-gray-100 shadow-sm
+                bg-white rounded-sm
+                border border-[#D5D9D9]
                 p-3
                 flex flex-col
-                hover:shadow-md hover:border-gray-200
+                hover:shadow-md hover:border-[#007185]/40
                 transition-all duration-200
               "
             >
@@ -111,12 +111,12 @@ export default function ProductListCard({ items, content }: ProductListCardProps
                 type="button"
                 className={`
                   w-full mt-2
-                  text-xs font-semibold
-                  rounded-lg py-1.5
+                  text-xs font-bold
+                  rounded-md py-1.5
                   transition-all duration-150
                   ${addedIds.has(item.id)
                     ? 'bg-[#E0F2F1] text-[#00838F] cursor-default'
-                    : 'bg-[#00838F] text-white hover:bg-[#006d75] active:scale-[0.96]'
+                    : 'bg-[#FFD814] text-[#0F1111] hover:bg-[#F7CA00] active:scale-[0.96] shadow-sm'
                   }
                 `}
                 onClick={() => {
@@ -142,7 +142,7 @@ export default function ProductListCard({ items, content }: ProductListCardProps
         <div
           className={`
             pointer-events-none absolute top-0 right-4 bottom-1
-            w-10 rounded-r-xl
+            w-10 rounded-r-sm
             bg-gradient-to-l from-white to-transparent
             transition-opacity duration-300
             ${canScrollRight ? 'opacity-100' : 'opacity-0'}

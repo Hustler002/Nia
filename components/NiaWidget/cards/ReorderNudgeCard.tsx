@@ -240,7 +240,7 @@ export default function ReorderNudgeCard({ nudge, content }: ReorderNudgeCardPro
   // ── Snooze/Dismiss ─────────────────────────────────────────────────────
   if (dismissed) {
     return (
-      <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
+      <div className="bg-white rounded-md p-4 border border-[#D5D9D9] shadow-sm text-center">
         <p className="text-sm text-gray-400">
           Got it — I won&apos;t remind you about {product.name} for a while. ✌️
         </p>
@@ -250,7 +250,7 @@ export default function ReorderNudgeCard({ nudge, content }: ReorderNudgeCardPro
 
   if (snoozed) {
     return (
-      <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
+      <div className="bg-white rounded-md p-4 border border-[#D5D9D9] shadow-sm text-center">
         <p className="text-sm text-gray-400">
           No problem! I&apos;ll remind you about {product.name} tomorrow. ⏰
         </p>
@@ -263,7 +263,7 @@ export default function ReorderNudgeCard({ nudge, content }: ReorderNudgeCardPro
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-white rounded-2xl p-4 border-l-4 border-[#00838F] shadow-sm"
+      className="bg-white rounded-md p-4 border-l-4 border-[#00838F] shadow-sm border border-[#D5D9D9]"
     >
       {/* ── Content text ──────────────────────────────────────────────── */}
       <p className="text-sm text-[#0F1111] mb-3 leading-relaxed">{content}</p>
@@ -271,7 +271,7 @@ export default function ReorderNudgeCard({ nudge, content }: ReorderNudgeCardPro
       {/* ── Product info row ──────────────────────────────────────────── */}
       <div className="flex items-center gap-3 mb-1">
         {/* Emoji product image */}
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center shadow-inner">
+        <div className="w-12 h-12 rounded-sm bg-[#F7F8F8] border border-[#D5D9D9] flex items-center justify-center">
           <span className="text-2xl leading-none" role="img" aria-label={product.name}>
             {product.image}
           </span>
@@ -297,7 +297,7 @@ export default function ReorderNudgeCard({ nudge, content }: ReorderNudgeCardPro
       </p>
 
       {/* ── Sparkline timeline chart ──────────────────────────────────── */}
-      <div className="mb-3 bg-gray-50/50 rounded-xl p-2">
+      <div className="mb-3 bg-[#F7F8F8] rounded-sm p-2 border border-[#D5D9D9]">
         <SparklineTimeline
           cycleDays={product.cycleDays}
           percentUsed={percentUsed}
@@ -342,7 +342,7 @@ export default function ReorderNudgeCard({ nudge, content }: ReorderNudgeCardPro
           type="button"
           onClick={decrement}
           aria-label="Decrease quantity"
-          className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center
+          className="w-8 h-8 rounded-sm border border-[#D5D9D9] flex items-center justify-center
             text-[#0F1111] text-sm font-medium hover:bg-gray-50 active:scale-95 transition"
         >
           −
@@ -356,7 +356,7 @@ export default function ReorderNudgeCard({ nudge, content }: ReorderNudgeCardPro
           type="button"
           onClick={increment}
           aria-label="Increase quantity"
-          className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center
+          className="w-8 h-8 rounded-sm border border-[#D5D9D9] flex items-center justify-center
             text-[#0F1111] text-sm font-medium hover:bg-gray-50 active:scale-95 transition"
         >
           +
@@ -368,10 +368,10 @@ export default function ReorderNudgeCard({ nudge, content }: ReorderNudgeCardPro
         type="button"
         onClick={handleAddToCart}
         disabled={added}
-        className={`rounded-xl py-2.5 px-5 w-full text-sm font-semibold transition-all active:scale-[0.98] ${
+        className={`rounded-md py-2.5 px-5 w-full text-sm font-bold transition-all active:scale-[0.98] ${
           added
             ? 'bg-green-500 text-white'
-            : 'bg-[#FF9900] hover:bg-[#e88b00] text-white'
+            : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] shadow-sm'
         }`}
       >
         {added ? '✓ Added to cart!' : `Add to cart · ₹${(product.price * qty).toLocaleString('en-IN')}`}

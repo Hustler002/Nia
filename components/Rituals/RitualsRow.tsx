@@ -39,13 +39,13 @@ export default function RitualsRow() {
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-[#0F1111]">Your rituals</h2>
             <span className="text-lg">⚡</span>
-            <span className="text-xs bg-[#E0F2F1] text-[#00838F] font-semibold px-2 py-0.5 rounded-full">
+            <span className="text-[10px] bg-[#F7F8F8] text-[#007185] font-bold px-2 py-0.5 rounded-sm border border-[#D5D9D9]">
               {rituals.length} saved
             </span>
           </div>
           <Link
             href="/rituals"
-            className="text-[#00838F] text-sm font-semibold hover:underline transition-colors hidden sm:block"
+            className="text-[#007185] text-xs font-semibold hover:text-[#C45500] hover:underline transition-colors hidden sm:block"
           >
             Manage rituals →
           </Link>
@@ -66,23 +66,23 @@ export default function RitualsRow() {
           <div className="snap-start">
             <button
               onClick={handleCreateNew}
-              className="flex-shrink-0 w-52 sm:w-56 h-full min-h-[240px] bg-white rounded-2xl
-                border-2 border-dashed border-gray-200 hover:border-[#00838F]/40
-                hover:bg-[#E0F2F1]/20 transition-all duration-300
+              className="flex-shrink-0 w-52 sm:w-56 h-full min-h-[240px] bg-white rounded-sm
+                border-2 border-dashed border-[#D5D9D9] hover:border-[#007185]
+                hover:bg-[#F7F8F8] transition-all duration-200
                 flex flex-col items-center justify-center gap-3 px-4 group"
             >
               {/* Plus icon */}
-              <div className="w-12 h-12 rounded-full bg-[#E0F2F1] flex items-center justify-center
-                group-hover:bg-[#00838F] transition-colors duration-300">
+              <div className="w-10 h-10 rounded-sm bg-[#F7F8F8] border border-[#D5D9D9] flex items-center justify-center
+                group-hover:bg-[#232F3E] group-hover:border-[#232F3E] transition-colors duration-200">
                 <svg
-                  className="w-6 h-6 text-[#00838F] group-hover:text-white transition-colors"
+                  className="w-5 h-5 text-gray-500 group-hover:text-white transition-colors"
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
               </div>
               <div className="text-center">
-                <p className="text-sm font-semibold text-[#0F1111] group-hover:text-[#00838F] transition-colors">
+                <p className="text-xs font-semibold text-[#0F1111] group-hover:text-[#007185] transition-colors">
                   Create new ritual
                 </p>
                 <p className="text-[11px] text-gray-400 mt-0.5">
@@ -97,7 +97,7 @@ export default function RitualsRow() {
         <div className="flex justify-center mt-2 sm:hidden">
           <Link
             href="/rituals"
-            className="text-[#00838F] text-sm font-semibold hover:underline"
+            className="text-[#007185] text-xs font-semibold hover:text-[#C45500] hover:underline"
           >
             Manage all rituals →
           </Link>

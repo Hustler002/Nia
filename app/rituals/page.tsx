@@ -32,7 +32,7 @@ function EmojiPicker({
         <button
           key={emoji}
           onClick={() => onSelect(emoji)}
-          className={`w-9 h-9 rounded-lg flex items-center justify-center text-lg
+          className={`w-9 h-9 rounded-sm flex items-center justify-center text-lg
             transition-all hover:scale-110 ${
             emoji === selected
               ? 'bg-[#00838F]/10 ring-2 ring-[#00838F] scale-110'
@@ -92,12 +92,12 @@ function RitualDetailCard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md
+      className="bg-white rounded-sm border border-[#D5D9D9] hover:shadow-md
         transition-shadow overflow-hidden"
     >
       {/* ── Header ────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-r from-[#00838F]/5 to-[#00838F]/10 px-5 py-4
-        border-b border-gray-100">
+      <div className="bg-[#F7F8F8] px-5 py-4
+        border-b border-[#D5D9D9]">
         {editing ? (
           <div className="space-y-3">
             <div className="flex items-center gap-3">
@@ -106,8 +106,8 @@ function RitualDetailCard({
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 className="flex-1 text-base font-bold text-[#0F1111] bg-white border
-                  border-gray-200 rounded-lg px-3 py-1.5 outline-none
-                  focus:border-[#00838F] transition-colors"
+                  border-[#D5D9D9] rounded-sm px-3 py-1.5 outline-none
+                  focus:border-[#007185] transition-colors"
                 autoFocus
               />
             </div>
@@ -115,8 +115,8 @@ function RitualDetailCard({
             <div className="flex gap-2">
               <button
                 onClick={handleSave}
-                className="px-4 py-1.5 bg-[#00838F] text-white text-xs font-semibold
-                  rounded-lg hover:bg-[#006d75] transition-colors"
+                className="px-4 py-1.5 bg-[#FFD814] text-[#0F1111] text-xs font-bold
+                  rounded-md hover:bg-[#F7CA00] transition-colors"
               >
                 Save
               </button>
@@ -144,7 +144,7 @@ function RitualDetailCard({
                   {ritual.autoNamed && (
                     <>
                       <span className="text-gray-300">·</span>
-                      <span className="text-[10px] bg-[#E0F2F1] text-[#00838F] px-1.5 py-0.5 rounded-full font-medium">
+                      <span className="text-[10px] bg-[#F7F8F8] text-[#007185] px-1.5 py-0.5 rounded-sm font-medium border border-[#D5D9D9]">
                         Auto-named
                       </span>
                     </>
@@ -155,7 +155,7 @@ function RitualDetailCard({
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setEditing(true)}
-                className="w-8 h-8 rounded-full hover:bg-white/80 flex items-center
+                className="w-8 h-8 rounded-sm hover:bg-white/80 flex items-center
                   justify-center transition-colors"
                 aria-label="Edit ritual"
               >
@@ -167,7 +167,7 @@ function RitualDetailCard({
               </button>
               <button
                 onClick={() => setShowConfirmDelete(true)}
-                className="w-8 h-8 rounded-full hover:bg-red-50 flex items-center
+                className="w-8 h-8 rounded-sm hover:bg-red-50 flex items-center
                   justify-center transition-colors"
                 aria-label="Delete ritual"
               >
@@ -226,11 +226,11 @@ function RitualDetailCard({
           <button
             onClick={handleReorder}
             disabled={reordered}
-            className={`px-6 py-2.5 text-sm font-semibold rounded-xl transition-all
+            className={`px-6 py-2.5 text-sm font-bold rounded-md transition-all
               active:scale-[0.97] ${
               reordered
                 ? 'bg-green-50 text-green-600'
-                : 'bg-[#FF9900] hover:bg-[#e88b00] text-white shadow-sm hover:shadow-md'
+                : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] shadow-sm hover:shadow-md'
             }`}
           >
             {reordered ? '✓ Added to cart!' : `Reorder all · ₹${ritual.estimatedTotal}`}
@@ -268,7 +268,7 @@ function RitualDetailCard({
                 <button
                   onClick={() => onDelete(ritual.id)}
                   className="px-3 py-1 text-xs font-semibold text-white bg-red-500
-                    hover:bg-red-600 rounded-lg transition-colors"
+                    hover:bg-red-600 rounded-sm transition-colors"
                 >
                   Delete
                 </button>
@@ -320,14 +320,14 @@ export default function RitualsPage() {
   const totalItems = rituals.reduce((sum, r) => sum + r.items.length, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-[#EAEDED]">
       {/* ── Header ───────────────────────────────────────────────── */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-40">
+      <div className="bg-white border-b border-[#D5D9D9] sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center
+              className="w-8 h-8 rounded-sm hover:bg-gray-100 flex items-center
                 justify-center transition-colors"
             >
               <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24"
@@ -344,8 +344,8 @@ export default function RitualsPage() {
           </div>
           <button
             onClick={handleBulkReorder}
-            className="px-4 py-2 bg-[#FF9900] hover:bg-[#e88b00] text-white text-xs
-              font-semibold rounded-xl transition-colors shadow-sm hover:shadow-md
+            className="px-4 py-2 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-xs
+              font-bold rounded-md transition-colors shadow-sm hover:shadow-md
               active:scale-[0.97]"
           >
             Reorder all · ₹{totalAllRituals}
@@ -382,7 +382,7 @@ export default function RitualsPage() {
                 'Help me create a new ritual for items I buy every week'
               )}
               className="mt-4 px-6 py-2.5 bg-[#00838F] hover:bg-[#006d75] text-white
-                text-sm font-semibold rounded-xl transition-colors"
+                text-sm font-semibold rounded-md transition-colors"
             >
               Create your first ritual
             </button>
@@ -391,7 +391,7 @@ export default function RitualsPage() {
 
         {/* ── Import from past order section ──────────────────────── */}
         {rituals.length > 0 && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 text-center">
+          <div className="bg-white rounded-sm border border-[#D5D9D9] p-5 text-center">
             <p className="text-sm font-semibold text-[#0F1111]">
               📋 Turn a past order into a ritual
             </p>
@@ -403,7 +403,7 @@ export default function RitualsPage() {
                 'Show me my recent orders so I can turn one into a ritual'
               )}
               className="mt-3 px-5 py-2 bg-[#E0F2F1] hover:bg-[#B2DFDB] text-[#00838F]
-                text-xs font-semibold rounded-xl transition-colors"
+                text-xs font-semibold rounded-md transition-colors"
             >
               Import from order history
             </button>

@@ -43,7 +43,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-        <body className="min-h-full flex flex-col bg-white text-[#0F1111]">
+        <body className="min-h-full flex flex-col bg-[#EAEDED] text-[#0F1111]">
           <NiaProvider>
             {children}
             {/* Persistent Nia floating widget — visible on all pages */}

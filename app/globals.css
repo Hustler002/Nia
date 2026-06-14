@@ -1,11 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #EAEDED;
   --foreground: #0F1111;
   --nia-teal: #00838F;
   --nia-teal-light: #E0F2F1;
-  --amazon-orange: #FF9900;
+  --amazon-navy: #232F3E;
+  --amazon-gold: #FFD814;
+  --amazon-gold-hover: #F7CA00;
+  --amazon-orange: #FFA41C;
+  --amazon-orange-hover: #FA8900;
+  --amazon-link: #007185;
+  --amazon-border: #D5D9D9;
 }
 
 @theme inline {

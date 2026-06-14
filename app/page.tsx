@@ -32,17 +32,17 @@ export default function HomePage() {
         <CategoryGrid />
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-100 py-6 px-4">
+      {/* Footer — Amazon dark style */}
+      <footer className="bg-[#232F3E] border-t border-[#3B4859] py-5 px-4 mt-0">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <span className="font-semibold text-[#0F1111]">amazon</span>
-            <span className="font-semibold text-[#FF9900]">now</span>
-            <span className="text-gray-300">·</span>
-            <span>Powered by</span>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="font-bold text-white">amazon</span>
+            <span className="font-bold text-[#FF9900]">now</span>
+            <span className="text-white/30">·</span>
+            <span className="text-white/50">Powered by</span>
             <span className="font-semibold text-[#00838F]">Nia</span>
           </div>
-          <p className="text-xs text-gray-300">
+          <p className="text-xs text-white/30">
             © 2026 Amazon. Hackathon demo — not a production service.
           </p>
         </div>

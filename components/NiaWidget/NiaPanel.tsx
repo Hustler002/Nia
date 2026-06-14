@@ -31,7 +31,7 @@ function MessageBubble({ msg }: { msg: NiaMessage }) {
           initial={{ opacity: 0, y: 8, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.2 }}
-          className="max-w-[85%] rounded-2xl rounded-br-md px-4 py-3 bg-[#232F3E] text-white"
+          className="max-w-[85%] rounded-md rounded-br-sm px-4 py-3 bg-[#232F3E] text-white"
         >
           <p className="text-sm leading-relaxed">{msg.content}</p>
         </motion.div>
@@ -96,7 +96,7 @@ function renderRichCard(msg: NiaMessage) {
     default:
       // Plain text message with teal left border
       return (
-        <div className="bg-white rounded-2xl rounded-bl-md border border-gray-100 border-l-4 border-l-[#00838F] px-4 py-3 shadow-sm">
+        <div className="bg-white rounded-md rounded-bl-sm border border-[#D5D9D9] border-l-4 border-l-[#00838F] px-4 py-3 shadow-sm">
           <p className="text-sm leading-relaxed text-[#0F1111] whitespace-pre-line">
             {msg.content}
           </p>
@@ -115,7 +115,7 @@ function TypingIndicator() {
       exit={{ opacity: 0, y: -8 }}
       className="flex justify-start"
     >
-      <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 border border-gray-100 border-l-4 border-l-[#00838F] shadow-sm">
+      <div className="bg-white rounded-md rounded-bl-sm px-4 py-3 border border-[#D5D9D9] border-l-4 border-l-[#00838F] shadow-sm">
         <div className="flex items-center gap-2">
           <div className="flex gap-1">
             <span
@@ -386,9 +386,9 @@ export default function NiaPanel() {
             onDragEnd={handleDragEnd}
             className="fixed z-[999] bg-white shadow-2xl flex flex-col overflow-hidden
               /* Mobile: bottom drawer */
-              inset-x-0 bottom-0 h-[85vh] rounded-t-3xl
+              inset-x-0 bottom-0 h-[85vh] rounded-t-md
               /* Desktop: right sidebar */
-              sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[420px] sm:h-full sm:rounded-none sm:rounded-l-2xl"
+              sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[420px] sm:h-full sm:rounded-none sm:rounded-l-md"
             role="dialog"
             aria-label="Nia AI Shopping Assistant"
             id="nia-chat-panel"
@@ -491,7 +491,7 @@ export default function NiaPanel() {
                       <button
                         key={suggestion.text}
                         onClick={() => handleSend(suggestion.text)}
-                        className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-[#E0F2F1] rounded-xl border border-gray-100 hover:border-[#00838F]/20 transition-all text-left group"
+                        className="w-full flex items-center gap-3 px-4 py-3 bg-[#F7F8F8] hover:bg-[#E0F2F1] rounded-sm border border-[#D5D9D9] hover:border-[#00838F]/30 transition-all text-left group"
                       >
                         <span className="text-lg">{suggestion.emoji}</span>
                         <span className="text-xs text-gray-600 group-hover:text-[#00838F] transition-colors">
@@ -549,7 +549,7 @@ export default function NiaPanel() {
                   <button
                     key={chip}
                     onClick={() => handleSend(chip.replace(/\s*[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u, ''))}
-                    className="flex-shrink-0 px-3 py-1.5 bg-[#E0F2F1] text-[#00838F] text-xs font-medium rounded-full hover:bg-[#B2DFDB] transition-colors whitespace-nowrap border border-[#00838F]/10"
+                    className="flex-shrink-0 px-3 py-1.5 bg-[#E0F2F1] text-[#00838F] text-xs font-medium rounded-sm hover:bg-[#B2DFDB] transition-colors whitespace-nowrap border border-[#00838F]/10"
                   >
                     {chip}
                   </button>

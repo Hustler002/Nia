@@ -47,9 +47,9 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
   return (
     <div
       className="
-        w-full max-w-sm rounded-2xl bg-white
+        w-full max-w-sm rounded-md bg-white
         border-l-4 border-l-[#00838F]
-        shadow-[0_2px_12px_rgba(0,0,0,0.06)]
+        shadow-sm border border-[#D5D9D9]
         overflow-hidden
       "
     >
@@ -68,7 +68,7 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
             key={item.id}
             className="
               flex items-center gap-3 p-2.5
-              bg-gray-50 rounded-xl border border-gray-100
+              bg-[#F7F8F8] rounded-sm border border-[#D5D9D9]
               hover:bg-gray-100 transition-colors duration-150
             "
           >
@@ -83,7 +83,7 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
             </span>
 
             {/* Qty selector — compact pill with minus/plus buttons */}
-            <div className="flex items-center gap-0 shrink-0 bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="flex items-center gap-0 shrink-0 bg-white rounded-sm border border-[#D5D9D9] overflow-hidden">
               <button
                 type="button"
                 onClick={() => updateQty(item.id, -1)}
@@ -128,7 +128,7 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
         <div
           className="
             flex items-center justify-between
-            bg-[#E0F2F1] rounded-xl px-4 py-3
+            bg-[#F7F8F8] rounded-sm border border-[#D5D9D9] px-4 py-3
           "
         >
           <div className="flex items-center gap-2">
@@ -141,7 +141,7 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
                 inline-flex items-center gap-1
                 text-[10px] font-medium text-green-700
                 bg-green-50 border border-green-200
-                rounded-full px-2 py-0.5
+                rounded-sm px-2 py-0.5
               "
             >
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
@@ -153,12 +153,12 @@ export default function CartSummaryCard({ items, content }: CartSummaryCardProps
             type="button"
             onClick={handleAddAll}
             className={`
-              text-sm font-semibold rounded-lg px-5 py-2
+              text-sm font-bold rounded-md px-5 py-2
               active:scale-[0.97] transition-all duration-150
-              shadow-[0_2px_6px_rgba(255,153,0,0.3)]
+              shadow-sm
               ${addedAll
                 ? 'bg-green-500 text-white'
-                : 'bg-[#FF9900] text-white hover:bg-[#e88b00]'
+                : 'bg-[#FFD814] text-[#0F1111] hover:bg-[#F7CA00]'
               }
             `}
           >

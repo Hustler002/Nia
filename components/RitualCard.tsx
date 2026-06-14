@@ -29,9 +29,9 @@ export default function RitualCard({ ritual }: { ritual: Ritual }) {
   };
 
   return (
-    <div className="flex-shrink-0 w-64 sm:w-72 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group">
+    <div className="flex-shrink-0 w-64 sm:w-72 bg-white rounded-sm border border-[#D5D9D9] hover:shadow-md transition-all duration-200 overflow-hidden group">
       {/* Header strip */}
-      <div className="bg-gradient-to-r from-[#00838F]/5 to-[#00838F]/10 px-4 py-3 border-b border-gray-100">
+      <div className="bg-[#F7F8F8] px-4 py-3 border-b border-[#D5D9D9]">
         <div className="flex items-center gap-2">
           <span className="text-xl">{ritual.emoji}</span>
           <h3 className="text-sm font-bold text-[#0F1111] truncate">{ritual.name}</h3>
@@ -65,12 +65,12 @@ export default function RitualCard({ ritual }: { ritual: Ritual }) {
         {!reordered ? (
           <button
             onClick={handleReorder}
-            className="w-full py-2.5 bg-[#00838F] hover:bg-[#006d75] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98]"
+            className="w-full py-2 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-xs font-bold rounded-md transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98]"
           >
             Reorder · ₹{ritual.total}
           </button>
         ) : (
-          <div className="w-full py-2.5 bg-green-50 text-green-600 text-sm font-semibold rounded-xl text-center flex items-center justify-center gap-2">
+          <div className="w-full py-2 bg-green-50 text-green-600 text-xs font-bold rounded-md text-center flex items-center justify-center gap-2">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>

@@ -13,17 +13,14 @@ export default function EmergencyBanner() {
       className="block group"
       aria-label="Emergency mode - get an assembled kit with fastest delivery"
     >
-      <div className="relative overflow-hidden bg-gradient-to-r from-[#FF6B00] via-[#FF4500] to-[#D32F2F] py-4 px-4 sm:px-6">
-        {/* Animated shine effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-        
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#CC0C39] via-[#D32F2F] to-[#CC0C39] py-3 px-4 sm:px-6">
         <div className="relative max-w-7xl mx-auto flex items-center justify-center gap-3">
-          <span className="text-2xl animate-pulse">🚨</span>
-          <p className="text-white font-semibold text-sm sm:text-base text-center">
+          <span className="text-xl animate-pulse">🚨</span>
+          <p className="text-white font-bold text-xs sm:text-sm text-center">
             Emergency? Tap here — assembled kit + fastest delivery in 60 seconds
           </p>
           <svg
-            className="w-5 h-5 text-white/80 group-hover:translate-x-1 transition-transform"
+            className="w-4 h-4 text-white/80 group-hover:translate-x-1 transition-transform"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

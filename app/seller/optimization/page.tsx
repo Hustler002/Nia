@@ -198,14 +198,14 @@ export default function SellerOptimizationPage() {
   // ─── LEFT PANEL: Current Listing ──────────────────────────────────────
   const LeftPanel = (
     <div className="w-full lg:w-[45%] flex-shrink-0">
-      <div className="bg-white rounded-2xl shadow-sm p-6 space-y-6">
+      <div className="bg-white rounded-sm shadow-sm p-6 space-y-6 border border-[#D5D9D9]">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold" style={{ color: DARK }}>
             Current Listing
           </h2>
           <span
-            className="text-xs font-semibold px-3 py-1 rounded-full"
+            className="text-xs font-semibold px-3 py-1 rounded-sm border border-[#D5D9D9]"
             style={{ backgroundColor: TEAL_LIGHT, color: TEAL }}
           >
             {LISTING.matchScore}% match
@@ -233,7 +233,7 @@ export default function SellerOptimizationPage() {
         </div>
 
         {/* Attributes table */}
-        <div className="border border-gray-100 rounded-xl overflow-hidden">
+        <div className="border border-[#D5D9D9] rounded-sm overflow-hidden">
           {LISTING.attributes.map((attr, idx) => (
             <div
               key={attr.label}
@@ -261,13 +261,13 @@ export default function SellerOptimizationPage() {
             {SEARCH_QUERIES.map((sq) => (
               <div
                 key={sq.query}
-                className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-2.5"
+                className="flex items-center justify-between bg-[#F7F8F8] rounded-sm px-4 py-2.5 border border-[#D5D9D9]"
               >
                 <code className="text-sm font-mono text-gray-700">
                   &lsquo;{sq.query}&rsquo;
                 </code>
                 <span
-                  className="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
+                  className="text-xs font-semibold px-2.5 py-1 rounded-sm whitespace-nowrap"
                   style={{ backgroundColor: '#FFF3E0', color: '#E65100' }}
                 >
                   {sq.volume} searches
@@ -334,10 +334,10 @@ export default function SellerOptimizationPage() {
   // ─── RIGHT PANEL: Nia Chat ────────────────────────────────────────────
   const RightPanel = (
     <div className="w-full lg:w-[55%] flex-shrink-0">
-      <div className="bg-white rounded-2xl shadow-sm flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)]">
+      <div className="bg-white rounded-sm shadow-sm flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)] border border-[#D5D9D9]">
         {/* Chat header */}
         <div
-          className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 rounded-t-2xl"
+          className="flex items-center gap-3 px-5 py-4 border-b border-[#D5D9D9] rounded-t-sm"
         >
           {/* Nia avatar */}
           <div
@@ -368,7 +368,7 @@ export default function SellerOptimizationPage() {
               return (
                 <div key={msg.id} className="flex justify-end">
                   <div
-                    className="max-w-[80%] rounded-2xl rounded-br-md px-4 py-3 text-sm text-white leading-relaxed"
+                    className="max-w-[80%] rounded-md rounded-br-sm px-4 py-3 text-sm text-white leading-relaxed"
                     style={{ backgroundColor: NAVY }}
                   >
                     {msg.content}
@@ -381,7 +381,7 @@ export default function SellerOptimizationPage() {
             return (
               <div key={msg.id} className="flex justify-start">
                 <div
-                  className="max-w-[85%] rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-relaxed border-l-4"
+                  className="max-w-[85%] rounded-md rounded-bl-sm px-4 py-3 text-sm leading-relaxed border-l-4"
                   style={{
                     backgroundColor: 'white',
                     borderLeftColor: TEAL,
@@ -406,7 +406,7 @@ export default function SellerOptimizationPage() {
                       </p>
 
                       {/* Before */}
-                      <div className="bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                      <div className="bg-red-50 border border-red-100 rounded-sm px-3 py-2">
                         <span className="text-[10px] uppercase font-bold text-red-400 tracking-wider">
                           Before
                         </span>
@@ -416,7 +416,7 @@ export default function SellerOptimizationPage() {
                       </div>
 
                       {/* After */}
-                      <div className="bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+                      <div className="bg-green-50 border border-green-100 rounded-sm px-3 py-2">
                         <span className="text-[10px] uppercase font-bold text-green-500 tracking-wider">
                           After
                         </span>
@@ -429,7 +429,7 @@ export default function SellerOptimizationPage() {
                         type="button"
                         onClick={() => setAppliedTitle(true)}
                         disabled={appliedTitle}
-                        className="w-full py-2 rounded-lg text-sm font-semibold text-white transition-opacity cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-2 rounded-md text-sm font-bold text-white transition-opacity cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ backgroundColor: TEAL }}
                       >
                         {appliedTitle ? '✓ Title Applied' : msg.suggestion.buttonLabel}
@@ -445,7 +445,7 @@ export default function SellerOptimizationPage() {
           {isTyping && (
             <div className="flex justify-start">
               <div
-                className="rounded-2xl rounded-bl-md px-4 py-3 border-l-4 flex items-center gap-1.5"
+                className="rounded-md rounded-bl-sm px-4 py-3 border-l-4 flex items-center gap-1.5"
                 style={{
                   backgroundColor: 'white',
                   borderLeftColor: TEAL,
@@ -481,7 +481,7 @@ export default function SellerOptimizationPage() {
               type="button"
               onClick={() => sendMessage(chip)}
               disabled={isTyping}
-              className="text-xs font-medium px-3 py-1.5 rounded-full border transition-colors cursor-pointer disabled:opacity-40"
+              className="text-xs font-medium px-3 py-1.5 rounded-sm border transition-colors cursor-pointer disabled:opacity-40"
               style={{
                 borderColor: TEAL,
                 color: TEAL,
@@ -500,7 +500,7 @@ export default function SellerOptimizationPage() {
 
         {/* Input bar */}
         <div className="px-4 pb-4 pt-2">
-          <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus-within:border-[#00838F] transition-colors">
+          <div className="flex items-center gap-2 bg-[#F7F8F8] border border-[#D5D9D9] rounded-sm px-4 py-2.5 focus-within:border-[#00838F] transition-colors">
             <input
               type="text"
               value={input}
@@ -542,7 +542,7 @@ export default function SellerOptimizationPage() {
 
   // ─── PAGE RENDER ────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#EAEDED]">
       {/* Top bar with back button */}
       <div className="px-4 sm:px-6 lg:px-8 pt-4 pb-2">
         <a

@@ -146,14 +146,14 @@ export default function NiaChatPanel() {
       <div
         className={`fixed z-[999] bg-white shadow-2xl flex flex-col
           /* Mobile: bottom drawer */
-          inset-x-0 bottom-0 h-[85vh] rounded-t-3xl
+          inset-x-0 bottom-0 h-[85vh] rounded-t-md
           /* Desktop: right sidebar */
-          sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[420px] sm:h-full sm:rounded-none sm:rounded-l-3xl
+          sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[420px] sm:h-full sm:rounded-none sm:rounded-l-md
           animate-slide-up sm:animate-slide-left
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#D5D9D9]">
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="w-9 h-9 rounded-full bg-[#00838F] flex items-center justify-center">
@@ -199,10 +199,10 @@ export default function NiaChatPanel() {
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                className={`max-w-[85%] rounded-md px-4 py-3 ${
                   msg.role === 'user'
-                    ? 'bg-[#00838F] text-white rounded-br-md'
-                    : 'bg-gray-50 text-[#0F1111] rounded-bl-md border border-gray-100'
+                    ? 'bg-[#00838F] text-white rounded-br-sm'
+                    : 'bg-[#F7F8F8] text-[#0F1111] rounded-bl-sm border border-[#D5D9D9]'
                 }`}
               >
                 <p className="text-sm leading-relaxed">{msg.text}</p>
@@ -213,7 +213,7 @@ export default function NiaChatPanel() {
                     {msg.cards.map((card, i) => (
                       <div
                         key={i}
-                        className="flex items-center gap-3 bg-white rounded-xl p-2.5 border border-gray-100 shadow-sm"
+                        className="flex items-center gap-3 bg-white rounded-sm p-2.5 border border-[#D5D9D9]"
                       >
                         <span className="text-xl flex-shrink-0">{card.emoji}</span>
                         <div className="flex-1 min-w-0">
@@ -227,11 +227,11 @@ export default function NiaChatPanel() {
                     ))}
 
                     {/* Cart summary */}
-                    <div className="flex items-center justify-between bg-[#E0F2F1] rounded-xl p-3 mt-2">
+                    <div className="flex items-center justify-between bg-[#F7F8F8] rounded-sm border border-[#D5D9D9] p-3 mt-2">
                       <span className="text-xs font-semibold text-[#00838F]">
                         Total: ₹{totalCartPrice(msg.cards)}
                       </span>
-                      <button className="px-4 py-1.5 bg-[#00838F] text-white text-xs font-bold rounded-lg hover:bg-[#006d75] transition-colors">
+                      <button className="px-4 py-1.5 bg-[#FFD814] text-[#0F1111] text-xs font-bold rounded-md hover:bg-[#F7CA00] transition-colors">
                         Add all to cart
                       </button>
                     </div>
@@ -244,7 +244,7 @@ export default function NiaChatPanel() {
           {/* Typing indicator */}
           {isTyping && (
             <div className="flex justify-start">
-              <div className="bg-gray-50 rounded-2xl rounded-bl-md px-4 py-3 border border-gray-100">
+              <div className="bg-[#F7F8F8] rounded-md rounded-bl-sm px-4 py-3 border border-[#D5D9D9]">
                 <div className="flex gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: '0ms' }} />
                   <span className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -258,8 +258,8 @@ export default function NiaChatPanel() {
         </div>
 
         {/* Input bar */}
-        <form onSubmit={handleSubmit} className="border-t border-gray-100 px-4 py-3">
-          <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2 border border-gray-200 focus-within:border-[#00838F] transition-colors">
+        <form onSubmit={handleSubmit} className="border-t border-[#D5D9D9] px-4 py-3">
+          <div className="flex items-center gap-2 bg-[#F7F8F8] rounded-sm px-3 py-2 border border-[#D5D9D9] focus-within:border-[#00838F] transition-colors">
             <input
               ref={inputRef}
               type="text"

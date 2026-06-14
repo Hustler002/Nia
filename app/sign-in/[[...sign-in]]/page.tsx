@@ -7,7 +7,7 @@ import { SignIn } from '@clerk/nextjs';
 
 export default function SignInPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#E0F2F1] via-white to-[#FFF8E1] flex items-center justify-center px-4">
+    <main className="min-h-screen bg-[#EAEDED] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-[#0F1111]">
@@ -22,7 +22,7 @@ export default function SignInPage() {
           appearance={{
             elements: {
               formButtonPrimary: 'bg-[#00838F] hover:bg-[#006d75] text-sm',
-              card: 'shadow-xl border border-gray-100 rounded-2xl',
+              card: 'shadow-md border border-[#D5D9D9] rounded-sm',
               headerTitle: 'hidden',
               headerSubtitle: 'hidden',
             },

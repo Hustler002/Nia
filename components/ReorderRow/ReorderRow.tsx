@@ -46,7 +46,7 @@ export default function ReorderRow() {
               >
                 ✨
               </span>
-              <span className="text-xs bg-[#E0F2F1] text-[#00838F] font-semibold px-2 py-0.5 rounded-full">
+              <span className="text-[10px] bg-[#F7F8F8] text-[#007185] font-bold px-2 py-0.5 rounded-sm border border-[#D5D9D9]">
                 AI predicted
               </span>
             </div>
@@ -71,7 +71,7 @@ export default function ReorderRow() {
                     .getState()
                     .open("Show me everything I'm likely running low on")
                 }
-                className="text-[#00838F] text-sm font-semibold hover:underline cursor-pointer transition-colors"
+                className="text-[#007185] text-xs font-semibold hover:text-[#C45500] hover:underline cursor-pointer transition-colors"
               >
                 See all predictions →
               </button>
@@ -79,7 +79,7 @@ export default function ReorderRow() {
           </>
         ) : (
           /* ── Empty state — user is well stocked ──────────────── */
-          <div className="bg-[#E0F2F1]/30 rounded-2xl p-6 text-center">
+          <div className="bg-white rounded-sm border border-[#D5D9D9] p-6 text-center">
             {/* Green checkmark circle */}
             <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
               <svg

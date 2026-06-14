@@ -81,8 +81,8 @@ export default function RitualCard({ ritual, onEdit }: RitualCardProps) {
   return (
     <div className="relative">
       <div
-        className="flex-shrink-0 w-52 sm:w-56 bg-white rounded-2xl border border-gray-100
-          shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
+        className="flex-shrink-0 w-52 sm:w-56 bg-white rounded-sm border border-[#D5D9D9]
+          hover:shadow-md transition-all duration-200 overflow-hidden group"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -149,11 +149,11 @@ export default function RitualCard({ ritual, onEdit }: RitualCardProps) {
             {!reordered ? (
               <button
                 onClick={handleReorder}
-                className={`w-full py-2.5 text-sm font-semibold rounded-xl
+                className={`w-full py-2 text-xs font-bold rounded-md
                   transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.97]
                   ${isDueToday
-                    ? 'bg-[#FF9900] hover:bg-[#e88b00] text-white'
-                    : 'bg-[#00838F] hover:bg-[#006d75] text-white'
+                    ? 'bg-[#FFA41C] hover:bg-[#FA8900] text-[#0F1111]'
+                    : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111]'
                   }`}
               >
                 Reorder · ₹{ritual.estimatedTotal}
@@ -162,8 +162,8 @@ export default function RitualCard({ ritual, onEdit }: RitualCardProps) {
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-full py-2.5 bg-green-50 text-green-600 text-sm font-semibold
-                  rounded-xl text-center flex items-center justify-center gap-2"
+                className="w-full py-2 bg-green-50 text-green-600 text-xs font-bold
+                  rounded-md text-center flex items-center justify-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -183,8 +183,8 @@ export default function RitualCard({ ritual, onEdit }: RitualCardProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 left-0 right-0 top-full mt-2 bg-white rounded-xl
-              border border-gray-100 shadow-xl p-3 min-w-[220px]"
+            className="absolute z-50 left-0 right-0 top-full mt-2 bg-white rounded-sm
+              border border-[#D5D9D9] shadow-lg p-3 min-w-[220px]"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
@@ -231,7 +231,7 @@ export default function RitualCard({ ritual, onEdit }: RitualCardProps) {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-2xl p-5 max-w-sm w-full shadow-2xl"
+              className="bg-white rounded-md p-4 max-w-sm w-full shadow-xl border border-[#D5D9D9]"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-2 mb-4">
@@ -272,10 +272,10 @@ export default function RitualCard({ ritual, onEdit }: RitualCardProps) {
                       </div>
                       <button
                         onClick={() => acceptSubstitution(sub)}
-                        className={`px-3 py-1 text-[11px] font-semibold rounded-lg transition-all ${
+                        className={`px-3 py-1 text-[11px] font-semibold rounded-sm transition-all ${
                           acceptedSubs.has(sub.originalItem.productId)
                             ? 'bg-green-50 text-green-600'
-                            : 'bg-[#E0F2F1] text-[#00838F] hover:bg-[#B2DFDB]'
+                            : 'bg-[#F7F8F8] text-[#007185] border border-[#D5D9D9] hover:bg-[#E7F4F5]'
                         }`}
                       >
                         {acceptedSubs.has(sub.originalItem.productId) ? '✓ Swapped' : 'Swap'}
@@ -288,15 +288,15 @@ export default function RitualCard({ ritual, onEdit }: RitualCardProps) {
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={() => { setShowSubstitution(false); addToCart(); }}
-                  className="flex-1 py-2.5 text-xs font-semibold border border-gray-200
-                    rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="flex-1 py-2 text-xs font-semibold border border-[#D5D9D9]
+                    rounded-md text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   Skip subs
                 </button>
                 <button
                   onClick={confirmSubstitutions}
-                  className="flex-1 py-2.5 text-xs font-semibold bg-[#FF9900] hover:bg-[#e88b00]
-                    text-white rounded-xl transition-colors"
+                  className="flex-1 py-2 text-xs font-bold bg-[#FFD814] hover:bg-[#F7CA00]
+                    text-[#0F1111] rounded-md transition-colors"
                 >
                   Confirm & add to cart
                 </button>

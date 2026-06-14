@@ -41,7 +41,7 @@ export default function ComparisonCard({ data, content }: ComparisonCardProps) {
   const recommended = data.products.find((p) => p.recommended);
 
   return (
-    <div className="bg-white rounded-2xl rounded-bl-md border border-gray-100 border-l-4 border-l-[#00838F] shadow-sm overflow-hidden">
+    <div className="bg-white rounded-md rounded-bl-sm border border-[#D5D9D9] border-l-4 border-l-[#00838F] shadow-sm overflow-hidden">
       {/* Content text */}
       <div className="px-4 pt-4 pb-3">
         <p className="text-sm leading-relaxed text-[#0F1111]">{content}</p>
@@ -53,15 +53,15 @@ export default function ComparisonCard({ data, content }: ComparisonCardProps) {
           {data.products.map((product) => (
             <div
               key={product.id}
-              className={`min-w-[130px] max-w-[140px] flex flex-col items-center p-3 rounded-xl border transition-all ${
+              className={`min-w-[130px] max-w-[140px] flex flex-col items-center p-3 rounded-sm border transition-all ${
                 product.recommended
-                  ? 'border-[#00838F] bg-[#E0F2F1]/30 shadow-sm'
-                  : 'border-gray-100 bg-gray-50'
+                  ? 'border-[#007185] bg-[#F7FAFA] shadow-sm'
+                  : 'border-[#D5D9D9] bg-[#F7F8F8]'
               }`}
             >
               {/* Best Pick badge */}
               {product.recommended && (
-                <div className="bg-[#FF9900] text-white text-[9px] font-bold rounded-full px-2 py-0.5 mb-2">
+                <div className="bg-[#FF9900] text-white text-[9px] font-bold rounded-sm px-2 py-0.5 mb-2">
                   ⭐ Best Pick
                 </div>
               )}
@@ -84,9 +84,9 @@ export default function ComparisonCard({ data, content }: ComparisonCardProps) {
 
               {/* Match score badge */}
               <div
-                className={`mt-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                className={`mt-2 rounded-sm px-2 py-0.5 text-[10px] font-bold ${
                   product.matchScore >= 90
-                    ? 'bg-[#E0F2F1] text-[#00838F]'
+                    ? 'bg-[#F7FAFA] text-[#007185] border border-[#007185]/30'
                     : 'bg-orange-50 text-orange-600'
                 }`}
               >
@@ -99,7 +99,7 @@ export default function ComparisonCard({ data, content }: ComparisonCardProps) {
 
       {/* Spec comparison table */}
       <div className="px-4 pb-3">
-        <div className="rounded-xl overflow-hidden border border-gray-100">
+        <div className="rounded-sm overflow-hidden border border-[#D5D9D9]">
           {data.attributes.map((attr, idx) => (
             <div
               key={attr}
@@ -155,7 +155,7 @@ export default function ComparisonCard({ data, content }: ComparisonCardProps) {
             </svg>
           </button>
           {showWhy && (
-            <div className="mt-2 bg-[#E0F2F1] rounded-lg p-3 text-xs text-gray-600 leading-relaxed">
+            <div className="mt-2 bg-[#F7F8F8] rounded-sm p-3 text-xs text-gray-600 leading-relaxed border border-[#D5D9D9]">
               {recommended.whyRecommended}
             </div>
           )}
@@ -166,10 +166,10 @@ export default function ComparisonCard({ data, content }: ComparisonCardProps) {
       {recommended && (
         <div className="px-4 pb-4">
           <button
-            className={`w-full font-semibold text-sm rounded-xl py-2.5 transition-colors shadow-sm ${
+            className={`w-full font-bold text-sm rounded-md py-2.5 transition-colors shadow-sm ${
               added
                 ? 'bg-[#00838F] text-white cursor-default'
-                : 'bg-[#FF9900] hover:bg-[#e8870d] text-white'
+                : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111]'
             }`}
             onClick={() => {
               if (added) return;

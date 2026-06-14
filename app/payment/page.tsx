@@ -1,8 +1,7 @@
 'use client';
 
 // app/payment/page.tsx
-// Pre-filled payment page — navigated to when Nia's checkout_direct tool fires
-// or when the user clicks "Place Order" from the cart drawer.
+// Amazon-style checkout page — left-aligned, structured, trust signals
 // Shows: item(s), resolved address, total, delivery ETA, confirm button.
 
 import { Suspense, useState } from 'react';
@@ -61,7 +60,7 @@ function PaymentContent() {
 
   if (placed) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#E0F2F1] to-white px-4 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#EAEDED] px-4 text-center">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -70,8 +69,8 @@ function PaymentContent() {
           🎉
         </motion.div>
         <h1 className="text-3xl font-bold text-[#0F1111] mb-2">Order Placed!</h1>
-        <p className="text-gray-500 text-lg mb-1">Delivering to <strong>{addressLabel}</strong></p>
-        <p className="text-[#00838F] font-semibold text-xl">Arriving in ~10 minutes ⚡</p>
+        <p className="text-gray-600 text-lg mb-1">Delivering to <strong>{addressLabel}</strong></p>
+        <p className="text-[#007600] font-bold text-xl">Arriving in ~10 minutes ⚡</p>
         <p className="text-xs text-gray-400 mt-6">Redirecting to home...</p>
       </div>
     );
@@ -79,7 +78,7 @@ function PaymentContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-red-50 to-white px-4 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#EAEDED] px-4 text-center">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -91,7 +90,7 @@ function PaymentContent() {
         <p className="text-gray-500 text-lg mb-4">{error}</p>
         <button
           onClick={() => { setError(null); }}
-          className="bg-[#00838F] hover:bg-[#006d75] text-white font-bold px-6 py-3 rounded-xl transition-colors"
+          className="bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-bold px-6 py-3 rounded-md transition-colors"
         >
           Try Again
         </button>
@@ -100,132 +99,142 @@ function PaymentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center gap-3">
-        <button onClick={() => router.back()} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-          <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <h1 className="text-xl font-bold text-[#0F1111]">Review & Pay</h1>
+    <div className="min-h-screen bg-[#EAEDED]">
+      {/* Header — Amazon Secure Checkout bar */}
+      <div className="bg-white border-b border-[#D5D9D9] px-4 py-3 shadow-sm">
+        <div className="max-w-5xl mx-auto flex items-center gap-3">
+          <button onClick={() => router.back()} className="p-1.5 rounded-sm hover:bg-gray-100 transition-colors">
+            <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-[#007600]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            <h1 className="text-xl font-bold text-[#0F1111]">Secure Checkout</h1>
+          </div>
+        </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-
-        {/* Delivery Address */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-lg">📍</span>
-            <h2 className="font-semibold text-[#0F1111]">Delivery Address</h2>
-          </div>
-          <div className="ml-7">
-            <span className="inline-block bg-[#E0F2F1] text-[#00838F] text-xs font-bold px-2 py-0.5 rounded-full mb-1">
-              {addressLabel.toUpperCase()}
-            </span>
-            <p className="text-sm text-gray-600">
-              {addressLabel.toLowerCase().includes('mom')
-                ? "Mom's House, Andheri West, Mumbai — 400058"
-                : "Home, Connaught Place, New Delhi — 110001"}
-            </p>
-            <p className="text-xs text-[#00838F] mt-1 font-medium">⚡ Estimated delivery: 8–12 minutes</p>
-          </div>
-        </motion.div>
-
-        {/* Order Items */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm"
-        >
-          <h2 className="font-semibold text-[#0F1111] mb-3">
-            Your Order ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})
-          </h2>
-          <div className="space-y-3">
-            {cartItems.map((item, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <span className="text-2xl w-10 text-center">{item.image}</span>
-                <div className="flex-1">
-                  <p className="font-medium text-sm text-[#0F1111]">{item.name}</p>
-                  <p className="text-xs text-gray-400">Qty: {item.qty}</p>
-                </div>
-                <p className="font-semibold text-sm text-[#0F1111]">₹{item.price * item.qty}</p>
+      {/* Main content — left-aligned, structured layout */}
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Left column — Address + Items + Payment */}
+          <div className="flex-1 space-y-4">
+            {/* Delivery Address */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-sm border border-[#D5D9D9] p-4"
+            >
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#D5D9D9]">
+                <span className="text-sm font-bold text-[#C45500]">1</span>
+                <h2 className="font-bold text-sm text-[#0F1111]">Delivery Address</h2>
               </div>
-            ))}
+              <div className="flex items-start gap-3 ml-5">
+                <div>
+                  <p className="text-sm font-bold text-[#0F1111]">{addressLabel}</p>
+                  <p className="text-xs text-gray-600 mt-0.5">
+                    {addressLabel.toLowerCase().includes('mom')
+                      ? "Mom's House, Andheri West, Mumbai — 400058"
+                      : "Home, Connaught Place, New Delhi — 110001"}
+                  </p>
+                  <p className="text-xs text-[#007600] mt-1 font-bold">⚡ Estimated delivery: 8–12 minutes</p>
+                </div>
+                <button className="text-xs text-[#007185] hover:text-[#C45500] hover:underline ml-auto">Change</button>
+              </div>
+            </motion.div>
+
+            {/* Order Items */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white rounded-sm border border-[#D5D9D9] p-4"
+            >
+              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[#D5D9D9]">
+                <span className="text-sm font-bold text-[#C45500]">2</span>
+                <h2 className="font-bold text-sm text-[#0F1111]">
+                  Review Items ({cartItems.length})
+                </h2>
+              </div>
+              <div className="space-y-3">
+                {cartItems.map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
+                    <span className="text-2xl w-10 text-center flex-shrink-0">{item.image}</span>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-[#007185] hover:text-[#C45500] cursor-pointer">{item.name}</p>
+                      <p className="text-xs text-gray-500">Qty: {item.qty}</p>
+                    </div>
+                    <p className="font-bold text-sm text-[#0F1111]">₹{item.price * item.qty}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Payment Method */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-sm border border-[#D5D9D9] p-4"
+            >
+              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[#D5D9D9]">
+                <span className="text-sm font-bold text-[#C45500]">3</span>
+                <h2 className="font-bold text-sm text-[#0F1111]">Payment Method</h2>
+              </div>
+              <div className="flex items-center gap-3 p-3 rounded-sm bg-[#F7F8F8] border-2 border-[#007185]">
+                <div className="w-4 h-4 rounded-full border-[5px] border-[#007185]" />
+                <div>
+                  <p className="font-medium text-sm text-[#0F1111]">UPI / Amazon Pay</p>
+                  <p className="text-xs text-gray-500">pranjal@upi (demo)</p>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
 
-        {/* Bill Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm"
-        >
-          <h2 className="font-semibold text-[#0F1111] mb-3">Bill Summary</h2>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between text-gray-600">
-              <span>Subtotal</span><span>₹{subtotal}</span>
-            </div>
-            <div className="flex justify-between text-gray-600">
-              <span>Delivery Fee</span>
-              <span className={deliveryFee === 0 ? 'text-green-600 font-medium' : ''}>
-                {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}
-              </span>
-            </div>
-            <div className="flex justify-between font-bold text-[#0F1111] text-base pt-2 border-t border-gray-100">
-              <span>Total</span><span>₹{total}</span>
-            </div>
+          {/* Right column — Order Summary */}
+          <div className="lg:w-[320px] flex-shrink-0">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white rounded-sm border border-[#D5D9D9] p-4 sticky top-20"
+            >
+              {/* Place Order button — top of summary (Amazon style) */}
+              <button
+                onClick={handleConfirm}
+                disabled={placing || cartItems.length === 0}
+                className="w-full bg-[#FFD814] hover:bg-[#F7CA00] disabled:opacity-60 text-[#0F1111] font-bold text-sm py-2.5 rounded-md shadow-sm transition-all duration-200 mb-3"
+              >
+                {placing ? '⏳ Placing...' : 'Place your order'}
+              </button>
+
+              <p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
+                By placing your order, you agree to Amazon&apos;s Conditions of Use and Privacy Notice. This is a hackathon demo.
+              </p>
+
+              <div className="border-t border-[#D5D9D9] pt-3">
+                <h3 className="font-bold text-sm text-[#0F1111] mb-2">Order Summary</h3>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Items ({cartItems.length}):</span><span>₹{subtotal}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Delivery:</span>
+                    <span className={deliveryFee === 0 ? 'text-[#007600] font-bold' : ''}>
+                      {deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-bold text-[#CC0C39] text-base pt-2 border-t border-[#D5D9D9]">
+                    <span>Order total:</span><span>₹{total}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
-
-        {/* Payment Method (Demo) */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm"
-        >
-          <h2 className="font-semibold text-[#0F1111] mb-3">Payment Method</h2>
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-[#E0F2F1] border-2 border-[#00838F]">
-            <span className="text-xl">💳</span>
-            <div>
-              <p className="font-medium text-sm text-[#0F1111]">UPI / Amazon Pay</p>
-              <p className="text-xs text-gray-500">pranjal@upi (demo)</p>
-            </div>
-            <div className="ml-auto w-4 h-4 rounded-full bg-[#00838F] flex items-center justify-center">
-              <div className="w-2 h-2 rounded-full bg-white" />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Confirm Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          onClick={handleConfirm}
-          disabled={placing || cartItems.length === 0}
-          className="w-full bg-[#00838F] hover:bg-[#006d75] disabled:opacity-60 text-white font-bold text-lg py-4 rounded-2xl shadow-lg transition-all duration-200 flex items-center justify-center gap-3"
-        >
-          {placing ? (
-            <span className="animate-spin text-xl">⏳</span>
-          ) : (
-            <>
-              <span>⚡</span>
-              <span>Confirm & Place Order — ₹{total}</span>
-            </>
-          )}
-        </motion.button>
-
-        <p className="text-center text-xs text-gray-400 pb-6">
-          By placing this order you agree to our Terms of Service. This is a hackathon demo.
-        </p>
+        </div>
       </div>
     </div>
   );
@@ -234,7 +243,7 @@ function PaymentContent() {
 export default function PaymentPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#EAEDED]">
         <div className="animate-spin text-3xl">⚡</div>
       </div>
     }>

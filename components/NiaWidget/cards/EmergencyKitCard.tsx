@@ -22,7 +22,7 @@ export default function EmergencyKitCard({
   const [ordered, setOrdered] = useState(false);
 
   return (
-    <div className="bg-white rounded-2xl rounded-bl-md border border-gray-100 border-l-4 border-l-[#FF9900] shadow-sm overflow-hidden bg-gradient-to-b from-orange-50/50 to-white">
+    <div className="bg-white rounded-md rounded-bl-sm border border-[#D5D9D9] border-l-4 border-l-[#FF9900] shadow-sm overflow-hidden bg-gradient-to-b from-orange-50/50 to-white">
       {/* Header with pulsing emergency dot */}
       <div className="px-4 pt-4 pb-2">
         <div className="flex items-center gap-2 mb-2">
@@ -40,7 +40,7 @@ export default function EmergencyKitCard({
         {kit.items.map((item, idx) => (
           <div
             key={item.id}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
+            className={`flex items-center gap-3 px-3 py-2 rounded-sm ${
               idx % 2 === 0 ? 'bg-orange-50/40' : 'bg-white'
             }`}
           >
@@ -58,7 +58,7 @@ export default function EmergencyKitCard({
       </div>
 
       {/* ETA badge — large and prominent */}
-      <div className="mx-4 mb-3 bg-[#FF9900] text-white rounded-xl p-3 text-center">
+      <div className="mx-4 mb-3 bg-[#FF9900] text-white rounded-md p-3 text-center">
         <p className="text-[10px] uppercase tracking-wide opacity-80">
           Estimated Delivery
         </p>
@@ -77,10 +77,10 @@ export default function EmergencyKitCard({
           </span>
         </div>
         <button
-          className={`w-full font-bold text-sm rounded-xl py-3 transition-colors shadow-md ${
+          className={`w-full font-bold text-sm rounded-md py-3 transition-colors shadow-sm ${
             ordered
               ? 'bg-[#00838F] text-white cursor-default'
-              : 'bg-[#FF9900] hover:bg-[#e8870d] text-white'
+              : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111]'
           }`}
           style={ordered ? undefined : { animation: 'emergency-pulse 2s ease-in-out infinite' }}
           onClick={() => {

@@ -38,9 +38,9 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             <tr>
               <th className="p-4 border-b border-gray-200 bg-gray-50 w-1/4">Features</th>
               {result.products.map(p => (
-                <th key={p.id} className={`p-4 border-b border-gray-200 bg-white min-w-[200px] ${p.id === result.bestPickId ? 'border-t-4 border-t-teal-500' : ''}`}>
+                <th key={p.id} className={`p-4 border-b border-[#D5D9D9] bg-white min-w-[200px] ${p.id === result.bestPickId ? 'border-t-4 border-t-[#FF9900]' : ''}`}>
                   {p.id === result.bestPickId && (
-                    <div className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-2">⭐ Nia's Pick</div>
+                    <div className="text-xs font-bold text-[#C45500] uppercase tracking-wider mb-2">⭐ Nia&apos;s Pick</div>
                   )}
                   <div className="text-4xl mb-2">{p.imageUrl}</div>
                   <div className="font-semibold text-lg">{p.name}</div>
@@ -70,11 +70,11 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
         </table>
       </div>
 
-      <div className="mt-12 bg-teal-50 border border-teal-100 p-6 rounded-xl flex gap-4 items-start">
-        <div className="w-10 h-10 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold text-xl shrink-0">N</div>
+      <div className="mt-12 bg-[#E0F2F1] border border-[#00838F]/20 p-6 rounded-sm flex gap-4 items-start">
+        <div className="w-10 h-10 bg-[#00838F] text-white rounded-sm flex items-center justify-center font-bold text-xl shrink-0">N</div>
         <div>
-          <h3 className="text-lg font-bold text-teal-900 mb-2">Why Nia recommends {result.products.find(p => p.id === result.bestPickId)?.name}</h3>
-          <p className="text-teal-800">{result.bestPickReason}</p>
+          <h3 className="text-lg font-bold text-[#0F1111] mb-2">Why Nia recommends {result.products.find(p => p.id === result.bestPickId)?.name}</h3>
+          <p className="text-gray-700">{result.bestPickReason}</p>
         </div>
       </div>
     </div>

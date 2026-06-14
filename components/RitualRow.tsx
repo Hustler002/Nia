@@ -52,7 +52,7 @@ export default function RitualRow() {
           <h2 className="text-xl font-bold text-[#0F1111]">Your usual orders</h2>
           <span className="text-lg">⚡</span>
           {isLive && (
-            <span className="text-xs bg-[#FFF3E0] text-[#FF9900] font-semibold px-2 py-0.5 rounded-full">
+            <span className="text-[10px] bg-[#F7F8F8] text-[#007185] font-bold px-2 py-0.5 rounded-sm border border-[#D5D9D9]">
               Learned from your history
             </span>
           )}

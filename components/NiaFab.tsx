@@ -25,7 +25,7 @@ export default function NiaFab() {
       <div className="absolute inset-0 rounded-full bg-[#00838F]/30 animate-nia-pulse" />
 
       {/* Tooltip */}
-      <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-[#0F1111] text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+      <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-[#0F1111] text-white text-xs rounded-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
         Ask Nia anything ✨
       </div>
     </button>

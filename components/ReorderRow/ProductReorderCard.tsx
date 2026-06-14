@@ -94,8 +94,8 @@ export default function ProductReorderCard({ cycle }: ProductReorderCardProps) {
   return (
     <div
       className={
-        'flex-shrink-0 w-44 sm:w-48 bg-white rounded-2xl border border-gray-100 ' +
-        'shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group flex flex-col'
+        'flex-shrink-0 w-44 sm:w-48 bg-white rounded-sm border border-[#D5D9D9] ' +
+        'hover:shadow-md transition-all duration-200 overflow-hidden group flex flex-col'
       }
     >
       {/* ── 1. Product image area ─────────────────────────────────────── */}
@@ -107,7 +107,7 @@ export default function ProductReorderCard({ cycle }: ProductReorderCardProps) {
 
         {/* Urgency badge — top-left pill */}
         <span
-          className={`absolute top-2 left-2 ${cfg.bg} ${cfg.text} text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5`}
+          className={`absolute top-2 left-2 ${cfg.bg} ${cfg.text} text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-0.5`}
         >
           {cfg.emoji} {cfg.label}
         </span>
@@ -152,8 +152,8 @@ export default function ProductReorderCard({ cycle }: ProductReorderCardProps) {
       <div className="flex items-center justify-center gap-3 px-3 mt-2">
         <button
           onClick={() => setQty((q) => Math.max(1, q - 1))}
-          className="w-7 h-7 rounded-full border border-gray-200 text-gray-500 flex items-center justify-center
-                     hover:border-[#00838F] hover:text-[#00838F] active:scale-95 transition-all duration-150"
+          className="w-7 h-7 rounded-sm border border-[#D5D9D9] text-gray-500 flex items-center justify-center
+                     hover:border-[#007185] hover:text-[#007185] active:scale-95 transition-all duration-150"
           aria-label="Decrease quantity"
         >
           −
@@ -163,8 +163,8 @@ export default function ProductReorderCard({ cycle }: ProductReorderCardProps) {
         </span>
         <button
           onClick={() => setQty((q) => q + 1)}
-          className="w-7 h-7 rounded-full border border-gray-200 text-gray-500 flex items-center justify-center
-                     hover:border-[#00838F] hover:text-[#00838F] active:scale-95 transition-all duration-150"
+          className="w-7 h-7 rounded-sm border border-[#D5D9D9] text-gray-500 flex items-center justify-center
+                     hover:border-[#007185] hover:text-[#007185] active:scale-95 transition-all duration-150"
           aria-label="Increase quantity"
         >
           +
@@ -177,10 +177,10 @@ export default function ProductReorderCard({ cycle }: ProductReorderCardProps) {
           onClick={handleAdd}
           disabled={added}
           className={
-            'w-full py-2 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-[0.97] ' +
+            'w-full py-2 rounded-md text-xs font-semibold transition-all duration-200 active:scale-[0.97] ' +
             (added
               ? 'bg-green-50 text-green-600 cursor-default'
-              : 'bg-[#00838F] hover:bg-[#006d75] text-white')
+              : 'bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] shadow-sm')
           }
           aria-label={
             added

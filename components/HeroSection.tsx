@@ -1,6 +1,6 @@
 // components/HeroSection.tsx
 // Main hero with the Nia conversational input bar
-// The input bar is the centerpiece — clicking it opens the Nia chat panel
+// Amazon-style search bar: rigid rectangle, flush search button on right
 // Production: submit fires a Bedrock Agent invocation via API route
 
 'use client';
@@ -44,33 +44,27 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative py-12 sm:py-20 px-4 overflow-hidden">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#E0F2F1]/40 via-white to-white" />
-      
-      {/* Decorative floating dots */}
-      <div className="absolute top-8 left-[10%] w-2 h-2 rounded-full bg-[#00838F]/20 animate-float-slow" />
-      <div className="absolute top-20 right-[15%] w-3 h-3 rounded-full bg-[#FF9900]/20 animate-float-medium" />
-      <div className="absolute bottom-12 left-[20%] w-2.5 h-2.5 rounded-full bg-[#00838F]/15 animate-float-fast" />
-
+    <section className="relative py-6 sm:py-10 px-4 overflow-hidden bg-gradient-to-b from-[#232F3E] via-[#37475A] to-[#EAEDED]">
       <div className="relative max-w-2xl mx-auto text-center">
         {/* Headline */}
-        <h1 className="text-3xl sm:text-5xl font-bold text-[#0F1111] mb-3 tracking-tight">
+        <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 tracking-tight">
           Tell <span className="text-[#00838F]">Nia</span> what you need.
         </h1>
-        <p className="text-lg sm:text-xl text-gray-500 mb-8 font-medium">
+        <p className="text-base sm:text-lg text-white/70 mb-6 font-medium">
           Full cart. 10 minutes. Done.
         </p>
 
-        {/* Input bar */}
+        {/* Amazon-style Search Bar */}
         <form onSubmit={handleSubmit} className="relative">
-          <div className="flex items-center bg-white rounded-2xl shadow-lg shadow-gray-200/80 border border-gray-200 hover:border-[#00838F]/40 focus-within:border-[#00838F] focus-within:shadow-[#00838F]/10 transition-all duration-300 px-4 py-3 gap-3">
-            {/* Nia avatar with pulse */}
-            <div className="relative flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-[#00838F] flex items-center justify-center">
-                <span className="text-white text-sm font-bold">N</span>
+          <div className="flex items-stretch bg-white rounded-sm shadow-md border-2 border-[#FEBD69] focus-within:border-[#FF9900] transition-colors">
+            {/* Nia avatar — Nia branding, stays teal */}
+            <div className="flex items-center px-3 bg-[#E0F2F1] border-r border-[#D5D9D9] rounded-l-sm">
+              <div className="relative flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[#00838F] flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">N</span>
+                </div>
+                <div className="absolute inset-0 rounded-full bg-[#00838F]/30 animate-nia-pulse" />
               </div>
-              <div className="absolute inset-0 rounded-full bg-[#00838F]/30 animate-nia-pulse" />
             </div>
 
             {/* Input */}
@@ -81,7 +75,7 @@ export default function HeroSection() {
               onChange={(e) => setInputValue(e.target.value)}
               onFocus={handleInputFocus}
               placeholder={heroPlaceholders[placeholderIdx]}
-              className={`flex-1 text-base sm:text-lg bg-transparent outline-none text-[#0F1111] placeholder-gray-400 transition-opacity duration-300 ${
+              className={`flex-1 text-sm sm:text-base bg-transparent outline-none text-[#0F1111] placeholder-gray-400 px-3 py-3 transition-opacity duration-300 ${
                 isFading && !inputValue ? 'opacity-0' : 'opacity-100'
               }`}
               aria-label="Ask Nia what you need"
@@ -92,7 +86,7 @@ export default function HeroSection() {
             <button
               type="button"
               onClick={() => openNia()}
-              className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              className="flex-shrink-0 w-11 flex items-center justify-center border-l border-[#D5D9D9] hover:bg-gray-50 transition-colors"
               aria-label="Voice input"
             >
               <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -100,26 +94,26 @@ export default function HeroSection() {
               </svg>
             </button>
 
-            {/* Submit button */}
+            {/* Search button — Amazon orange, flush right */}
             <button
               type="submit"
-              className="flex-shrink-0 w-10 h-10 rounded-full bg-[#00838F] hover:bg-[#006d75] flex items-center justify-center transition-colors shadow-md"
+              className="flex-shrink-0 w-12 bg-[#FEBD69] hover:bg-[#F3A847] flex items-center justify-center rounded-r-sm transition-colors"
               aria-label="Send to Nia"
             >
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              <svg className="w-5 h-5 text-[#0F1111]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
             </button>
           </div>
         </form>
 
-        {/* Quick start chips */}
-        <div className="flex flex-wrap justify-center gap-2 mt-5">
+        {/* Quick start chips — Amazon filter pill style */}
+        <div className="flex flex-wrap justify-center gap-2 mt-4">
           {quickStartChips.map((chip) => (
             <button
               key={chip.label}
               onClick={() => openNia(chip.query)}
-              className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:border-[#00838F] hover:text-[#00838F] hover:shadow-md transition-all duration-200"
+              className="px-3 py-1.5 rounded-sm bg-white border border-[#D5D9D9] text-xs font-medium text-[#0F1111] hover:bg-[#F7FAFA] hover:border-[#007185] hover:text-[#007185] shadow-sm transition-all duration-150"
             >
               {chip.label}
             </button>

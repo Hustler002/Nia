@@ -9,25 +9,20 @@ import { categories } from '@/lib/mockData';
 
 export default function CategoryGrid() {
   return (
-    <section className="py-8 px-4">
+    <section className="py-6 px-4">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-xl font-bold text-[#0F1111] mb-5">Shop by category</h2>
+        <h2 className="text-lg font-bold text-[#0F1111] mb-4">Shop by category</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {categories.map((cat) => (
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
-              className="group relative bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 flex flex-col items-center gap-2 hover:shadow-lg hover:border-transparent transition-all duration-300 overflow-hidden"
+              className="group bg-white rounded-sm border border-[#D5D9D9] p-4 sm:p-5 flex flex-col items-center gap-2 hover:shadow-md transition-all duration-200"
             >
-              {/* Colored accent on hover */}
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-[0.04] transition-opacity duration-300 rounded-2xl"
-                style={{ backgroundColor: cat.color }}
-              />
-              <span className="text-3xl sm:text-4xl group-hover:scale-110 transition-transform duration-300">
+              <span className="text-3xl sm:text-4xl group-hover:scale-110 transition-transform duration-200">
                 {cat.emoji}
               </span>
-              <span className="text-sm font-semibold text-[#0F1111] text-center">{cat.name}</span>
+              <span className="text-xs font-semibold text-[#0F1111] text-center">{cat.name}</span>
             </Link>
           ))}
         </div>
