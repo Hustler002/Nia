@@ -6,6 +6,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSellerAuth } from '@/lib/seller/authStore';
 
 const CATEGORIES = [
   'Electronics',
@@ -44,6 +46,8 @@ export default function SellerSignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const { signup } = useSellerAuth();
+  const router = useRouter();
 
   const update = (field: string, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -78,9 +82,23 @@ export default function SellerSignupPage() {
     e.preventDefault();
     if (!validate()) return;
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    const { name, storeName, email, category, password } = form;
+    
+    const result = await signup({
+      name,
+      storeName,
+      email,
+      category,
+    }, password);
+
     setIsLoading(false);
+
+    if (!result.success) {
+      setErrors((prev) => ({ ...prev, email: result.error || 'Signup failed. Please try again.' }));
+      return;
+    }
+
     setShowSuccess(true);
   };
 
@@ -139,12 +157,12 @@ export default function SellerSignupPage() {
             </div>
           </div>
 
-          <a
-            href="/seller/login"
+          <button
+            onClick={() => router.push('/seller')}
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF9900] hover:bg-[#e88b00] text-white font-semibold rounded-xl transition-colors shadow-sm"
           >
             Explore the demo dashboard →
-          </a>
+          </button>
         </div>
       </div>
     );

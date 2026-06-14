@@ -1,9 +1,8 @@
 // lib/seller/authStore.ts
-// Zustand store for seller authentication
-// Mock auth — hardcoded credentials for hackathon demo
-// Production: replace with Amazon Cognito / Seller Central OAuth
+// Zustand store for seller authentication using Supabase Auth
 
 import { create } from 'zustand';
+import { supabase } from '@/lib/supabaseClient';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -21,14 +20,30 @@ export interface SellerProfile {
 interface SellerAuthStore {
   isAuthenticated: boolean;
   seller: SellerProfile | null;
-  isHydrated: boolean; // tracks whether sessionStorage has been read
+  isHydrated: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
-  hydrate: () => void; // restore from sessionStorage on mount
+  signup: (data: Omit<SellerProfile, 'id' | 'joinedDate' | 'avatarInitials' | 'plan'>, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  hydrate: () => void;
 }
 
-// ─── Mock Credentials ───────────────────────────────────────────────────────
-// Two sets so hackathon judges can use either
+// ─── Helper ─────────────────────────────────────────────────────────────────
+
+const buildProfileFromUser = (user: any): SellerProfile => {
+  const metadata = user.user_metadata || {};
+  return {
+    id: user.id,
+    email: user.email,
+    name: metadata.name || 'Seller',
+    storeName: metadata.storeName || 'My Store',
+    category: metadata.category || 'Other',
+    joinedDate: new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+    avatarInitials: (metadata.name || 'S').substring(0, 2).toUpperCase(),
+    plan: 'basic',
+  };
+};
+
+// ─── Mock Credentials Fallback ──────────────────────────────────────────────
 
 const VALID_CREDENTIALS = [
   { email: 'seller@techzone.in', password: 'demo123' },
@@ -36,8 +51,8 @@ const VALID_CREDENTIALS = [
 ];
 
 const DEFAULT_SELLER: SellerProfile = {
-  id: 'seller-001',
-  name: 'Ankit Gupta',
+  id: 'seller-mock',
+  name: 'Ankit Gupta (Demo)',
   email: 'seller@techzone.in',
   storeName: 'TechZone India',
   category: 'Electronics Accessories',
@@ -54,37 +69,71 @@ export const useSellerAuth = create<SellerAuthStore>((set) => ({
   isHydrated: false,
 
   login: async (email: string, password: string) => {
-    // Simulate network latency for realistic feel
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
+    // 1. Check Mock Credentials First
     const match = VALID_CREDENTIALS.find(
       (cred) => cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
     );
 
     if (match) {
+      await new Promise((resolve) => setTimeout(resolve, 600)); // smooth ux delay
       const seller = { ...DEFAULT_SELLER, email: match.email };
       set({ isAuthenticated: true, seller });
-      // Persist to sessionStorage so it survives refresh during demo
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('nia_seller_auth', JSON.stringify(seller));
       }
       return { success: true };
     }
 
-    return {
-      success: false,
-      error: 'Invalid email or password. Try seller@techzone.in / demo123',
-    };
+    // 2. Proceed with Supabase Auth
+    if (!supabase) return { success: false, error: 'Supabase client is not initialized.' };
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (error || !data.user) {
+      return { success: false, error: error?.message || 'Invalid login credentials' };
+    }
+
+    const seller = buildProfileFromUser(data.user);
+    set({ isAuthenticated: true, seller });
+    return { success: true };
   },
 
-  logout: () => {
-    set({ isAuthenticated: false, seller: null });
+  signup: async (data, password) => {
+    if (!supabase) return { success: false, error: 'Supabase client is not initialized.' };
+
+    const { data: authData, error } = await supabase.auth.signUp({
+      email: data.email,
+      password,
+      options: {
+        data: {
+          name: data.name,
+          storeName: data.storeName,
+          category: data.category,
+        },
+      },
+    });
+
+    if (error || !authData.user) {
+      return { success: false, error: error?.message || 'Registration failed' };
+    }
+
+    const seller = buildProfileFromUser(authData.user);
+    set({ isAuthenticated: true, seller });
+    return { success: true };
+  },
+
+  logout: async () => {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('nia_seller_auth');
     }
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+    set({ isAuthenticated: false, seller: null });
   },
 
   hydrate: () => {
+    // 1. Check for mock session first
     if (typeof window !== 'undefined') {
       const stored = sessionStorage.getItem('nia_seller_auth');
       if (stored) {
@@ -92,19 +141,42 @@ export const useSellerAuth = create<SellerAuthStore>((set) => ({
           const seller = JSON.parse(stored) as SellerProfile;
           set({ isAuthenticated: true, seller, isHydrated: true });
           return;
-        } catch {
-          // Corrupted data — ignore
-        }
+        } catch {}
       }
     }
-    set({ isHydrated: true });
+
+    // 2. If no mock session, check Supabase
+    if (!supabase) {
+      set({ isHydrated: true });
+      return;
+    }
+
+    // Get current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        set({
+          isAuthenticated: true,
+          seller: buildProfileFromUser(session.user),
+          isHydrated: true,
+        });
+      } else {
+        set({ isHydrated: true });
+      }
+    });
+
+    // Listen for auth changes
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        set({
+          isAuthenticated: true,
+          seller: buildProfileFromUser(session.user),
+        });
+      } else {
+        set({
+          isAuthenticated: false,
+          seller: null,
+        });
+      }
+    });
   },
 }));
-
-// Production extension:
-// - Replace with Amazon Cognito User Pool (Seller Identity Pool)
-// - JWT tokens stored in httpOnly cookies, not sessionStorage
-// - Refresh token rotation with sliding window
-// - MFA via TOTP or SMS OTP (mandatory for seller accounts)
-// - OAuth SSO with existing Amazon Seller Central credentials
-// - Role-based access control (owner vs staff vs read-only)
