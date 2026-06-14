@@ -197,6 +197,10 @@ export default function NiaPanel() {
         type: 'text',
         timestamp: new Date(),
       };
+      
+      // Read messages BEFORE adding the new one to avoid duplicate in API context
+      const currentMessages = [...useNiaChatStore.getState().messages, userMsg];
+      
       addMessage(userMsg);
       setInput('');
       setThinking(true);
@@ -204,21 +208,23 @@ export default function NiaPanel() {
       // Tell the product grid what the user is currently searching for
       useNiaChatStore.getState().setActiveQuery(query);
       
-      // Navigate to the dedicated search page
-      router.push(`/search?q=${encodeURIComponent(query)}`);
+      // Navigate to the search page only on the first query (not every follow-up message)
+      if (useNiaChatStore.getState().messages.length <= 2) {
+        router.push(`/search?q=${encodeURIComponent(query)}`);
+      }
 
       // Clear previous related products so the grid shows loading or clears
       useNiaChatStore.getState().setRelatedProducts([]);
 
       try {
-        // Get all current messages for context window
-        const currentMessages = [...useNiaChatStore.getState().messages, userMsg];
+        // Get all current messages for context window (already includes userMsg)
+        const contextMessages = currentMessages;
 
         const res = await fetch('/api/nia', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            messages: currentMessages,
+            messages: contextMessages,
             userId: user?.id ?? 'guest',
             userName: user?.firstName ?? user?.fullName ?? 'Guest',
             pincode: '110001',
@@ -283,7 +289,7 @@ export default function NiaPanel() {
         setThinking(false);
       }
     },
-    [input, isThinking, addMessage, setThinking, setQuickChips]
+    [input, isThinking, addMessage, setThinking, setQuickChips, router, user]
   );
 
 
@@ -375,7 +381,7 @@ export default function NiaPanel() {
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             // Mobile: also handle vertical drag
             drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
+            dragConstraints={{ top: 0, bottom: 300 }}
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
             className="fixed z-[999] bg-white shadow-2xl flex flex-col overflow-hidden

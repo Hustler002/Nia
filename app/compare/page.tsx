@@ -1,4 +1,5 @@
 import { compareProducts } from '@/lib/comparisons/compareEngine';
+import AddToCartButton from './AddToCartButton';
 
 export default async function ComparePage({ searchParams }: { searchParams: Promise<{ ids?: string }> }) {
   const params = await searchParams;
@@ -45,9 +46,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                   <div className="font-semibold text-lg">{p.name}</div>
                   <div className="text-gray-500 text-sm">{p.brand}</div>
                   <div className="font-bold text-xl mt-2">₹{p.price}</div>
-                  <button className="mt-4 w-full bg-orange-500 text-white font-medium py-2 rounded-md hover:bg-orange-600 transition-colors">
-                    Add to Cart
-                  </button>
+                  <AddToCartButton product={p} />
                 </th>
               ))}
             </tr>

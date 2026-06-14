@@ -18,12 +18,12 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
       type: 'cart_summary',
       content: "Movie night sorted! 🎬 Lay's + Kurkure for the crunch during tense scenes, Pepsi to sip through the slow parts, Oreos for dessert at the climax, and Cornitos when you want something different. Everything for 4 people, under ₹300, arriving in 10 mins. 🍿",
       data: [
-        { id: '1', name: "Haldiram's Aloo Bhujia", price: 55, mrp: 65, image: '🥜', qty: 1, category: 'Snacks' },
-        { id: '2', name: "Lay's Classic", price: 50, mrp: 50, image: '🥔', qty: 2, category: 'Snacks' },
-        { id: '3', name: "Kurkure", price: 20, mrp: 20, image: '🌶️', qty: 1, category: 'Snacks' },
-        { id: '4', name: "Pepsi 2L", price: 85, mrp: 90, image: '🥤', qty: 1, category: 'Beverages' },
-        { id: '5', name: "Cornitos Nacho", price: 40, mrp: 45, image: '🌮', qty: 1, category: 'Snacks' },
-        { id: '6', name: "Oreo", price: 40, mrp: 45, image: '🍪', qty: 1, category: 'Snacks' }
+        { id: 'mn-001', name: "Haldiram's Aloo Bhujia", price: 55, mrp: 65, image: '🥜', qty: 1, category: 'Snacks' },
+        { id: 'mn-002', name: "Lay's Classic", price: 50, mrp: 50, image: '🥔', qty: 2, category: 'Snacks' },
+        { id: 'mn-003', name: "Kurkure", price: 20, mrp: 20, image: '🌶️', qty: 1, category: 'Snacks' },
+        { id: 'mn-004', name: "Pepsi 2L", price: 85, mrp: 90, image: '🥤', qty: 1, category: 'Beverages' },
+        { id: 'mn-005', name: "Cornitos Nacho", price: 40, mrp: 45, image: '🌮', qty: 1, category: 'Snacks' },
+        { id: 'mn-006', name: "Oreo", price: 40, mrp: 45, image: '🍪', qty: 1, category: 'Snacks' }
       ],
       confidence: 94,
       reason: 'Top-rated snacks + beverages combo, most ordered for movie nights in your area.',
@@ -91,13 +91,13 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
       type: 'cart_summary',
       content: "Birthday party kit for 10 kids, ready to order! 🎂🎉",
       data: [
-        { id: '1', name: "Haldiram's Aloo Bhujia", price: 55, mrp: 65, image: '🥜', qty: 2, category: 'Snacks' },
-        { id: '2', name: "Lay's Classic", price: 50, mrp: 50, image: '🥔', qty: 3, category: 'Snacks' },
-        { id: '3', name: "Kurkure", price: 20, mrp: 20, image: '🌶️', qty: 2, category: 'Snacks' },
-        { id: '4', name: "Pepsi 2L", price: 85, mrp: 90, image: '🥤', qty: 2, category: 'Beverages' },
-        { id: '5', name: "Sprite 2L", price: 85, mrp: 90, image: '🍋', qty: 1, category: 'Beverages' },
-        { id: '6', name: "Oreo", price: 40, mrp: 45, image: '🍪', qty: 3, category: 'Snacks' },
-        { id: '7', name: "Cornitos", price: 40, mrp: 45, image: '🌮', qty: 2, category: 'Snacks' }
+        { id: 'bp-001', name: "Haldiram's Aloo Bhujia", price: 55, mrp: 65, image: '🥜', qty: 2, category: 'Snacks' },
+        { id: 'bp-002', name: "Lay's Classic", price: 50, mrp: 50, image: '🥔', qty: 3, category: 'Snacks' },
+        { id: 'bp-003', name: "Kurkure", price: 20, mrp: 20, image: '🌶️', qty: 2, category: 'Snacks' },
+        { id: 'bp-004', name: "Pepsi 2L", price: 85, mrp: 90, image: '🥤', qty: 2, category: 'Beverages' },
+        { id: 'bp-005', name: "Sprite 2L", price: 85, mrp: 90, image: '🍋', qty: 1, category: 'Beverages' },
+        { id: 'bp-006', name: "Oreo", price: 40, mrp: 45, image: '🍪', qty: 3, category: 'Snacks' },
+        { id: 'bp-007', name: "Cornitos", price: 40, mrp: 45, image: '🌮', qty: 2, category: 'Snacks' }
       ],
       confidence: 92,
       reason: 'Kid-friendly snacks + beverages bundle — most popular party picks in your area.',
@@ -126,7 +126,19 @@ function matchMockFlow(userMessage: string): NiaMessage | null {
 
 export async function POST(req: Request) {
   // 1. Parse and validate request body
-  const { messages, userId, userName, pincode } = await req.json();
+  let messages, userId, userName, pincode;
+  try {
+    const body = await req.json();
+    messages = body.messages;
+    userId = body.userId;
+    userName = body.userName;
+    pincode = body.pincode;
+    if (!Array.isArray(messages)) {
+      return Response.json({ id: 'err-' + Date.now(), role: 'nia', type: 'text', content: 'Invalid request format.', data: null, timestamp: new Date() }, { status: 400 });
+    }
+  } catch {
+    return Response.json({ id: 'err-' + Date.now(), role: 'nia', type: 'text', content: 'Invalid request body.', data: null, timestamp: new Date() }, { status: 400 });
+  }
   const latestUserMessage = messages.filter((m: any) => m.role === 'user').at(-1)?.content ?? "";
   
   // 2. Mock-first: check demo flows

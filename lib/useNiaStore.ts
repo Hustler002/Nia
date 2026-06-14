@@ -176,11 +176,11 @@ export const useNiaChatStore = create<NiaStoreState>((set) => ({
       if (existing) {
         return {
           liveCart: state.liveCart.map((i) =>
-            i.id === item.id ? { ...i, qty: i.qty + 1 } : i
+            i.id === item.id ? { ...i, qty: i.qty + (item.qty || 1) } : i
           ),
         };
       }
-      return { liveCart: [...state.liveCart, { ...item, qty: 1 }] };
+      return { liveCart: [...state.liveCart, { ...item, qty: item.qty || 1 }] };
     }),
   removeFromCart: (id) =>
     set((state) => ({ liveCart: state.liveCart.filter((i) => i.id !== id) })),

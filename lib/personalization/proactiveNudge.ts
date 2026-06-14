@@ -84,7 +84,7 @@ function createNudgeMessage(
  */
 function buildCriticalNudge(cycle: ConsumptionCycle): string {
   return (
-    `Hey Priya! 👋 Your ${cycle.productName} usually runs out every ` +
+    `Hey! 👋 Your ${cycle.productName} usually runs out every ` +
     `${cycle.avgDaysBetweenOrders} days — you last ordered ` +
     `${cycle.daysSinceLastOrder} days ago. Want me to add it to a quick cart?`
   );
