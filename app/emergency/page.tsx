@@ -4,12 +4,15 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { EMERGENCY_CATEGORIES, EmergencyCategory, detectEmergencyCategory } from '@/lib/emergency/categories';
 import { useNiaChatStore } from '@/lib/useNiaStore';
+import CustomEmergencyTile from '@/components/emergency/CustomEmergencyTile';
+import type { CustomEmergencyTileHandle } from '@/components/emergency/CustomEmergencyTile';
 
 export default function EmergencyPage() {
   const router = useRouter();
   const [inputText, setInputText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<EmergencyCategory | null>(null);
   const selectedRef = useRef<HTMLDivElement>(null);
+  const customTileRef = useRef<CustomEmergencyTileHandle>(null);
 
   // Search only runs on explicit submit
   const handleSearch = (e: React.FormEvent) => {
@@ -22,6 +25,10 @@ export default function EmergencyPage() {
       setTimeout(() => {
         selectedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
+    } else {
+      // Unknown emergency — route to the custom tile and auto-submit
+      setSelectedCategory(null);
+      customTileRef.current?.prefillAndSubmit(trimmed);
     }
   };
 
@@ -98,6 +105,9 @@ export default function EmergencyPage() {
               </button>
             </div>
           ))}
+
+          {/* 9th tile — Custom Emergency ("Something Else?") */}
+          <CustomEmergencyTile ref={customTileRef} />
         </div>
 
         {/* Expanded View */}

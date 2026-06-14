@@ -184,3 +184,22 @@ export interface Toast {
   type: 'success' | 'info' | 'error';
   duration?: number;
 }
+
+// ─── Emergency Categories ──────────────────────────────────
+
+export type EmergencyCategory =
+  | 'baby_care' | 'fever_illness' | 'surprise_guests'
+  | 'tech_rescue' | 'kitchen_mishap' | 'period_care' | 'pet_emergency'
+  | 'general_emergency'
+  | 'custom';
+
+// ─── Custom Emergency ──────────────────────────────────────
+
+export interface CustomEmergencyResult {
+  kit: EmergencyKit | null;
+  canFullyHelp: boolean;
+  canPartiallyHelp: boolean;
+  niaMessage: string;
+  cannotHelpWith?: string[];
+  alternativeSuggestion?: string;
+}
