@@ -1,11 +1,6 @@
 // components/TopBar.tsx
-<<<<<<< HEAD
 // Sticky top navigation bar — Amazon Navy design
-// Uses Clerk UserButton for live auth state + live cart count
-=======
-// Sticky top navigation bar for Amazon Now + Nia
 // Reads live data from useCartStore, useUserStore, useNiaChatStore
->>>>>>> main
 
 'use client';
 
