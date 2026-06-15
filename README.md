@@ -21,15 +21,15 @@
 
 <div align="center">
   <a href="[DEMO_VIDEO_URL]">
-    <img src="./public/Screenshot%202026-06-14%20220645.png" alt="Nia building a movie-night cart in under 2 seconds" width="800" />
+    <img src="./public/image.png" alt="Nia building a movie-night cart in under 2 seconds" width="800" />
   </a>
   <p><em>Nia building a movie-night cart in under 2 seconds. Replace [DEMO_THUMBNAIL.png] with a screenshot of the app with a play button overlaid, linking to [DEMO_VIDEO_URL].</em></p>
 </div>
 
 <div align="center">
   <img src="[SCREENSHOT_1]" width="250" alt="Problem" />
-  <img src="./public/Screenshot%202026-06-14%20220645.png" width="250" alt="Nia Input" />
-  <img src="./public/Screenshot%202026-06-15%20143246.png" width="250" alt="Result" />
+  <img src="./public/image.png" width="250" alt="Nia Input" />
+  <img src="./public/Screenshot%202026-06-15%20203328.png" width="250" alt="Result" />
 </div>
 
 > Quick-commerce solved the last mile. Nobody solved the first 30 seconds.
