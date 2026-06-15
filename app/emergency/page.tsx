@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { EMERGENCY_CATEGORIES, EmergencyCategory, detectEmergencyCategory } from '@/lib/emergency/categories';
 import { useNiaChatStore } from '@/lib/useNiaStore';
+import { useCartStore } from '@/lib/stores/useCartStore';
 import CustomEmergencyTile from '@/components/emergency/CustomEmergencyTile';
 import type { CustomEmergencyTileHandle } from '@/components/emergency/CustomEmergencyTile';
 
@@ -13,6 +14,15 @@ export default function EmergencyPage() {
   const [selectedCategory, setSelectedCategory] = useState<EmergencyCategory | null>(null);
   const selectedRef = useRef<HTMLDivElement>(null);
   const customTileRef = useRef<CustomEmergencyTileHandle>(null);
+  const [orderConfirmed, setOrderConfirmed] = useState(false);
+  const [orderedKitName, setOrderedKitName] = useState('');
+  const [orderedKitTotal, setOrderedKitTotal] = useState(0);
+  const [orderedKitCount, setOrderedKitCount] = useState(0);
+
+  // Cart awareness for sticky bar
+  const cartItems = useCartStore((s) => s.items);
+  const cartTotalItems = useCartStore((s) => s.getTotalItems());
+  const cartTotalPrice = useCartStore((s) => s.getTotalPrice());
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Hysteresis scroll listener — two thresholds prevent bounce
@@ -183,45 +193,100 @@ export default function EmergencyPage() {
               </div>
 
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pt-6 border-t border-gray-100">
-                <div>
-                  <div className="text-3xl font-extrabold text-gray-900 mb-1">
-                    ₹{selectedCategory.kit.reduce((sum, item) => sum + (item.price * item.qty), 0)}
-                  </div>
-                  <div className="text-sm text-green-600 font-bold flex items-center gap-1">
-                    ⚡ Fastest available: ~8 min from Central Hub
-                  </div>
-                </div>
+                {!orderConfirmed ? (
+                  <>
+                    <div>
+                      <div className="text-3xl font-extrabold text-gray-900 mb-1">
+                        ₹{selectedCategory.kit.reduce((sum, item) => sum + (item.price * item.qty), 0)}
+                      </div>
+                      <div className="text-sm text-green-600 font-bold flex items-center gap-1">
+                        ⚡ Fastest available: ~8 min from Central Hub
+                      </div>
+                    </div>
 
-                <div className="flex flex-col w-full md:w-auto gap-3">
-                  <button
-                    onClick={() => {
-                      selectedCategory.kit.forEach(item => {
-                        useNiaChatStore.getState().addToCart({
-                          id: item.id,
-                          name: item.name,
-                          price: item.price,
-                          mrp: item.price + 20,
-                          image: item.image,
-                          qty: item.qty,
-                          category: selectedCategory.name,
-                        });
-                      });
-                      useNiaChatStore.getState().openCart();
-                    }}
-                    className="bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-lg font-bold py-4 md:px-12 rounded-md shadow-sm transition-all transform hover:-translate-y-0.5"
-                  >
-                    Order this kit
-                  </button>
-                  <button
-                    onClick={() => {
-                      useNiaChatStore.getState().open('Customize my ' + selectedCategory.name + ' emergency kit');
-                      router.push('/');
-                    }}
-                    className="text-gray-500 hover:text-gray-900 font-medium text-sm underline underline-offset-4 decoration-gray-300 text-center"
-                  >
-                    Customize kit in chat
-                  </button>
-                </div>
+                    <div className="flex flex-col w-full md:w-auto gap-3">
+                      <button
+                        onClick={() => {
+                          const total = selectedCategory.kit.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                          selectedCategory.kit.forEach(item => {
+                            useNiaChatStore.getState().addToCart({
+                              id: item.id,
+                              name: item.name,
+                              price: item.price,
+                              mrp: item.price + 20,
+                              image: item.image,
+                              qty: item.qty,
+                              category: selectedCategory.name,
+                            });
+                          });
+                          setOrderedKitName(selectedCategory.name);
+                          setOrderedKitTotal(total);
+                          setOrderedKitCount(selectedCategory.kit.length);
+                          setOrderConfirmed(true);
+                          setTimeout(() => {
+                            selectedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }, 100);
+                        }}
+                        className="bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-lg font-bold py-4 md:px-12 rounded-md shadow-sm transition-all transform hover:-translate-y-0.5"
+                      >
+                        Order this kit
+                      </button>
+                      <button
+                        onClick={() => {
+                          useNiaChatStore.getState().open('Customize my ' + selectedCategory.name + ' emergency kit');
+                          router.push('/');
+                        }}
+                        className="text-gray-500 hover:text-gray-900 font-medium text-sm underline underline-offset-4 decoration-gray-300 text-center"
+                      >
+                        Customize kit in chat
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  /* ── Order Confirmation Inline ── */
+                  <div className="w-full">
+                    <div className="bg-green-50 border border-green-200 rounded-sm p-5 mb-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-green-800">{orderedKitName} Kit added!</h3>
+                          <p className="text-sm text-green-700">
+                            {orderedKitCount} items · ₹{orderedKitTotal} · Arrives in ~8 min
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <button
+                        onClick={() => useCartStore.getState().openCart()}
+                        className="flex-1 py-3 px-6 bg-white border-2 border-[#D5D9D9] text-[#0F1111] font-bold rounded-md hover:bg-gray-50 transition-colors text-center"
+                      >
+                        🛒 View Cart
+                      </button>
+                      <button
+                        onClick={() => router.push('/express-checkout')}
+                        className="flex-1 py-3 px-6 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] font-bold rounded-md shadow-sm transition-all transform hover:-translate-y-0.5 text-center"
+                      >
+                        ⚡ Express Checkout →
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setOrderConfirmed(false);
+                        setSelectedCategory(null);
+                      }}
+                      className="w-full mt-3 text-sm text-gray-400 hover:text-gray-600 font-medium text-center"
+                    >
+                      ← Back to kits
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -229,7 +294,7 @@ export default function EmergencyPage() {
       </div>
 
       {/* Mobile Sticky Input Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 p-3 bg-white border-t border-[#D5D9D9] shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] z-10">
+      <div className={`md:hidden fixed left-0 right-0 p-3 bg-white border-t border-[#D5D9D9] shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] z-10 ${cartItems.length > 0 ? 'bottom-[60px]' : 'bottom-0'}`}>
         <form onSubmit={handleSearch} className="flex">
           <input
             type="text"
@@ -249,6 +314,34 @@ export default function EmergencyPage() {
           </button>
         </form>
       </div>
+
+      {/* Mobile Sticky Cart Bar — appears once items are in cart */}
+      {cartItems.length > 0 && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-[#232F3E] text-white">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🛒</span>
+              <span className="text-sm font-semibold">
+                {cartTotalItems} item{cartTotalItems !== 1 ? 's' : ''} · ₹{cartTotalPrice}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => useCartStore.getState().openCart()}
+                className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold rounded-md transition-colors"
+              >
+                View Cart
+              </button>
+              <button
+                onClick={() => router.push('/express-checkout')}
+                className="px-4 py-2 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] text-sm font-bold rounded-md transition-colors"
+              >
+                Checkout ⚡
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

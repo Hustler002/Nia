@@ -11,6 +11,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useNiaChatStore } from '@/lib/useNiaStore';
 import type { NiaMessage } from '@/lib/useNiaStore';
 import { useUserStore } from '@/lib/stores/useUserStore';
+import { useCartStore } from '@/lib/stores/useCartStore';
 
 // Lazy-loaded card renderers
 import CartSummaryCard from './cards/CartSummaryCard';
@@ -158,9 +159,13 @@ export default function NiaPanel() {
 
   const [input, setInput] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const processedQueryRef = useRef<string>('');
+
+  // Cart awareness for panel coexistence
+  const isCartOpen = useCartStore((s) => s.isOpen);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -173,6 +178,21 @@ export default function NiaPanel() {
       setTimeout(() => inputRef.current?.focus(), 350);
     }
   }, [isOpen]);
+
+  // Desktop/mobile detection for panel coexistence
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 640);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // Mobile: auto-close cart when Nia opens (Nia takes priority)
+  useEffect(() => {
+    if (isOpen && !isDesktop && isCartOpen) {
+      useCartStore.getState().closeCart();
+    }
+  }, [isOpen, isDesktop, isCartOpen]);
 
   // Handle initial query from hero input or deep link
   useEffect(() => {
@@ -359,6 +379,7 @@ export default function NiaPanel() {
   };
 
   return (
+   <>
     <AnimatePresence>
       {isOpen && !pathname.startsWith('/seller') && (
         <>
@@ -387,8 +408,10 @@ export default function NiaPanel() {
             className="fixed z-[999] bg-white shadow-2xl flex flex-col overflow-hidden
               /* Mobile: bottom drawer */
               inset-x-0 bottom-0 h-[85vh] rounded-t-md
-              /* Desktop: right sidebar */
-              sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[420px] sm:h-full sm:rounded-none sm:rounded-l-md"
+              /* Desktop: right sidebar — shifts left when cart is open */
+              sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[420px] sm:h-full sm:rounded-none sm:rounded-l-md
+              transition-[right] duration-300 ease-in-out"
+            style={isDesktop && isCartOpen ? { right: '380px' } : undefined}
             role="dialog"
             aria-label="Nia AI Shopping Assistant"
             id="nia-chat-panel"
@@ -643,6 +666,18 @@ export default function NiaPanel() {
         </>
       )}
     </AnimatePresence>
+
+    {/* Minimized Nia pill — visible on mobile when displaced by cart */}
+    {!isOpen && isCartOpen && !isDesktop && !pathname.startsWith('/seller') && (
+      <button
+        onClick={() => useNiaChatStore.getState().toggle()}
+        className="fixed bottom-24 left-4 z-[1000] px-4 py-2.5 bg-[#00838F] text-white rounded-full shadow-lg flex items-center gap-2 sm:hidden animate-in fade-in slide-in-from-left-4 duration-300"
+      >
+        <span className="text-base">✨</span>
+        <span className="text-sm font-semibold">Nia</span>
+      </button>
+    )}
+   </>
   );
 }
 
