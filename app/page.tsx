@@ -61,7 +61,7 @@ export default function HomePage() {
             <span className="font-semibold text-[#00838F]">Nia</span>
           </div>
           <p className="text-xs text-white/30">
-            © 2026 Amazon. Hackathon demo — not a production service.
+            © HackOn With Amazon 6.0 demo — not a production service.
           </p>
         </div>
       </footer>
