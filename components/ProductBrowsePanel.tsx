@@ -23,6 +23,7 @@ const CATEGORIES = [
 // ─── Time-based smart suggestions ────────────────────────────────────────────
 type SuggestionsContext = {
   label: string;
+  subtitle: string;
   emoji: string;
   ids: string[];  // product IDs from CATALOG
 };
@@ -34,7 +35,8 @@ function getTimeContext(): SuggestionsContext {
   // Match night: Fri/Sat evening / IPL vibes — 7 PM to 11 PM on weekends
   if ((day === 5 || day === 6) && hour >= 19 && hour < 23) {
     return {
-      label: 'Match Night 🏏',
+      label: 'Match Night',
+      subtitle: "Nia noticed it's match night! Grab some party snacks and drinks to keep the hype going.",
       emoji: '🏏',
       ids: ['p-s1', 'p-s2', 'p-s3', 'p-s7', 'p-b1', 'p-b2', 'p-b7', 'p-s4'],
     };
@@ -42,7 +44,8 @@ function getTimeContext(): SuggestionsContext {
   // Early morning: 5 AM – 9 AM
   if (hour >= 5 && hour < 9) {
     return {
-      label: 'Good Morning 🌅',
+      label: 'Good Morning',
+      subtitle: "Rise and shine! Nia recommends these early-bird essentials to kickstart your day.",
       emoji: '🌅',
       ids: ['p-d1', 'p-d2', 'p-d3', 'p-b4', 'p-s6', 'p-f2', 'p-f3', 'p-b3'],
     };
@@ -50,7 +53,8 @@ function getTimeContext(): SuggestionsContext {
   // Morning: 9 AM – 12 PM
   if (hour >= 9 && hour < 12) {
     return {
-      label: 'Morning Essentials ☀️',
+      label: 'Morning Essentials',
+      subtitle: "Getting the day started? Nia predicts you'll need fresh dairy and quick bites.",
       emoji: '☀️',
       ids: ['p-d1', 'p-d4', 'p-d3', 'p-b3', 'p-b5', 'p-s5', 'p-s6', 'p-g1'],
     };
@@ -58,7 +62,8 @@ function getTimeContext(): SuggestionsContext {
   // Noon / Summer afternoon: 12 PM – 4 PM (hot! show cold drinks, ice creams)
   if (hour >= 12 && hour < 16) {
     return {
-      label: 'Cool Down 🧊',
+      label: 'Cool Down',
+      subtitle: "It's heating up outside! Let Nia cool things down with some refreshing drinks.",
       emoji: '🧊',
       ids: ['p-b1', 'p-b2', 'p-b5', 'p-b6', 'p-d5', 'p-b3', 'p-b8', 'p-d6'],
     };
@@ -66,14 +71,16 @@ function getTimeContext(): SuggestionsContext {
   // Evening snack time: 4 PM – 7 PM
   if (hour >= 16 && hour < 19) {
     return {
-      label: 'Evening Snacks 🌆',
+      label: 'Evening Snacks',
+      subtitle: "Evening cravings kicking in? Nia's got your back with some perfect tea-time snacks.",
       emoji: '🌆',
       ids: ['p-s1', 'p-s3', 'p-s2', 'p-b4', 'p-s5', 'p-s8', 'p-b7', 'p-s4'],
     };
   }
   // Late night: 11 PM – 5 AM
   return {
-    label: 'Late Night Cravings 🌙',
+    label: 'Late Night Cravings',
+    subtitle: "Up late? Nia predicts you might need some midnight snacks and instant food right about now.",
     emoji: '🌙',
     ids: ['p-s1', 'p-s2', 'p-i1', 'p-i2', 'p-b1', 'p-s7', 'p-s5', 'p-b8'],
   };
@@ -156,7 +163,7 @@ export default function ProductBrowsePanel() {
           <h2 className="text-lg font-bold text-[#0F1111]">Shop Everything</h2>
           <p className="text-xs text-gray-500 mt-0.5">
             {browseCategory === 'Suggested' && !(activeQuery && relatedProducts.length > 0)
-              ? `${timeCtx.label} — picked for you right now`
+              ? timeCtx.subtitle
               : 'Browse manually or let Nia build your cart with AI'}
           </p>
         </div>
