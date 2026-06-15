@@ -20,6 +20,65 @@ const CATEGORIES = [
   { id: 'Electronics Accessories', icon: '🎧' },
 ];
 
+// ─── Time-based smart suggestions ────────────────────────────────────────────
+type SuggestionsContext = {
+  label: string;
+  emoji: string;
+  ids: string[];  // product IDs from CATALOG
+};
+
+function getTimeContext(): SuggestionsContext {
+  const hour = new Date().getHours();
+  const day = new Date().getDay(); // 0 = Sun, 6 = Sat
+
+  // Match night: Fri/Sat evening / IPL vibes — 7 PM to 11 PM on weekends
+  if ((day === 5 || day === 6) && hour >= 19 && hour < 23) {
+    return {
+      label: 'Match Night 🏏',
+      emoji: '🏏',
+      ids: ['p-s1', 'p-s2', 'p-s3', 'p-s7', 'p-b1', 'p-b2', 'p-b7', 'p-s4'],
+    };
+  }
+  // Early morning: 5 AM – 9 AM
+  if (hour >= 5 && hour < 9) {
+    return {
+      label: 'Good Morning 🌅',
+      emoji: '🌅',
+      ids: ['p-d1', 'p-d2', 'p-d3', 'p-b4', 'p-s6', 'p-f2', 'p-f3', 'p-b3'],
+    };
+  }
+  // Morning: 9 AM – 12 PM
+  if (hour >= 9 && hour < 12) {
+    return {
+      label: 'Morning Essentials ☀️',
+      emoji: '☀️',
+      ids: ['p-d1', 'p-d4', 'p-d3', 'p-b3', 'p-b5', 'p-s5', 'p-s6', 'p-g1'],
+    };
+  }
+  // Noon / Summer afternoon: 12 PM – 4 PM (hot! show cold drinks, ice creams)
+  if (hour >= 12 && hour < 16) {
+    return {
+      label: 'Cool Down 🧊',
+      emoji: '🧊',
+      ids: ['p-b1', 'p-b2', 'p-b5', 'p-b6', 'p-d5', 'p-b3', 'p-b8', 'p-d6'],
+    };
+  }
+  // Evening snack time: 4 PM – 7 PM
+  if (hour >= 16 && hour < 19) {
+    return {
+      label: 'Evening Snacks 🌆',
+      emoji: '🌆',
+      ids: ['p-s1', 'p-s3', 'p-s2', 'p-b4', 'p-s5', 'p-s8', 'p-b7', 'p-s4'],
+    };
+  }
+  // Late night: 11 PM – 5 AM
+  return {
+    label: 'Late Night Cravings 🌙',
+    emoji: '🌙',
+    ids: ['p-s1', 'p-s2', 'p-i1', 'p-i2', 'p-b1', 'p-s7', 'p-s5', 'p-b8'],
+  };
+}
+
 export default function ProductBrowsePanel() {
   const { liveCart, browseCategory, addToCart, removeFromCart, updateQty, clearCart, setBrowseCategory, open, relatedProducts, activeQuery } = useNiaChatStore();
   const router = useRouter();
@@ -27,11 +86,22 @@ export default function ProductBrowsePanel() {
   const [addedId, setAddedId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Time-based suggestions — computed once on mount, stable for session
+  const [timeCtx] = useState(() => getTimeContext());
+  const timeSuggestedProducts = CATALOG.filter(p => timeCtx.ids.includes(p.id))
+    // preserve order from the ids array
+    .sort((a, b) => timeCtx.ids.indexOf(a.id) - timeCtx.ids.indexOf(b.id));
+
   // Determine what to show in the grid
   let filtered = CATALOG;
   if (browseCategory === 'Suggested') {
-    // Show AI's related products, fallback to catalog if empty for some reason
-    filtered = relatedProducts.length > 0 ? relatedProducts as any : CATALOG;
+    if (activeQuery && relatedProducts.length > 0) {
+      // Nia has search results — show those (existing behaviour)
+      filtered = relatedProducts as any;
+    } else {
+      // No search yet — show time-based personalised suggestions
+      filtered = timeSuggestedProducts as any;
+    }
   } else if (browseCategory !== 'All') {
     filtered = CATALOG.filter(p => p.category === browseCategory);
   }
@@ -40,18 +110,24 @@ export default function ProductBrowsePanel() {
   const INITIAL_VISIBLE = 8;
   const visibleProducts = isExpanded ? filtered : filtered.slice(0, INITIAL_VISIBLE);
 
-  // Dynamic categories array — inject "Suggested" if there's an active query
-  const dynamicCategories = [...CATEGORIES];
-  if (activeQuery && relatedProducts.length > 0) {
-    dynamicCategories.unshift({ id: 'Suggested', icon: '✨' });
-  }
+  // Always show Suggested tab (time-based), and it stays first
+  const dynamicCategories = [
+    { id: 'Suggested', icon: activeQuery && relatedProducts.length > 0 ? '✨' : timeCtx.emoji },
+    ...CATEGORIES,
+  ];
 
-  // Auto-switch to Suggested tab when a new query comes in
+  // Auto-switch to Suggested tab when a new Nia query comes in
   useEffect(() => {
     if (activeQuery && relatedProducts.length > 0) {
       setBrowseCategory('Suggested');
     }
   }, [activeQuery, relatedProducts, setBrowseCategory]);
+
+  // Start on Suggested tab by default
+  useEffect(() => {
+    setBrowseCategory('Suggested');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const totalItems = liveCart.reduce((sum, i) => sum + i.qty, 0);
   const totalPrice = liveCart.reduce((sum, i) => sum + i.price * i.qty, 0);
@@ -78,7 +154,11 @@ export default function ProductBrowsePanel() {
       <div className="max-w-7xl mx-auto px-4 pt-4 pb-3 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-[#0F1111]">Shop Everything</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Browse manually or let Nia build your cart with AI</p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {browseCategory === 'Suggested' && !(activeQuery && relatedProducts.length > 0)
+              ? `${timeCtx.label} — picked for you right now`
+              : 'Browse manually or let Nia build your cart with AI'}
+          </p>
         </div>
         <button
           onClick={() => open('What should I get today?')}
