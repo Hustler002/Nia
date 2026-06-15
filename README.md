@@ -8,6 +8,8 @@
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" />
     <img src="https://img.shields.io/badge/Framework-Next.js_14-black.svg" alt="Framework: Next.js 14" />
     <img src="https://img.shields.io/badge/AI-Groq_+_LLaMA_3.3-purple.svg" alt="AI: Groq + LLaMA 3.3" />
+    <img src="https://img.shields.io/badge/Auth-Clerk-blue.svg" alt="Auth: Clerk" />
+    <img src="https://img.shields.io/badge/Database-Supabase-green.svg" alt="Database: Supabase" />
     <img src="https://img.shields.io/badge/Deployment-Vercel-black.svg" alt="Deployment: Vercel" />
     <img src="https://img.shields.io/badge/Mobile-Responsive-blue.svg" alt="Mobile: Responsive" />
   </p>
@@ -19,15 +21,15 @@
 
 <div align="center">
   <a href="[DEMO_VIDEO_URL]">
-    <img src="[DEMO_THUMBNAIL.png]" alt="Nia building a movie-night cart in under 2 seconds" width="800" />
+    <img src="./public/Screenshot%202026-06-14%20220645.png" alt="Nia building a movie-night cart in under 2 seconds" width="800" />
   </a>
   <p><em>Nia building a movie-night cart in under 2 seconds. Replace [DEMO_THUMBNAIL.png] with a screenshot of the app with a play button overlaid, linking to [DEMO_VIDEO_URL].</em></p>
 </div>
 
 <div align="center">
   <img src="[SCREENSHOT_1]" width="250" alt="Problem" />
-  <img src="[SCREENSHOT_2]" width="250" alt="Nia Input" />
-  <img src="[SCREENSHOT_3]" width="250" alt="Result" />
+  <img src="./public/Screenshot%202026-06-14%20220645.png" width="250" alt="Nia Input" />
+  <img src="./public/Screenshot%202026-06-15%20143246.png" width="250" alt="Result" />
 </div>
 
 > Quick-commerce solved the last mile. Nobody solved the first 30 seconds.
@@ -40,10 +42,12 @@ Nia collapses these steps into one sentence. Built for amazon.in/now, Nia unders
 - 🧠 **Natural-language shopping** — type "movie night for 4 under ₹500", get a ready cart
 - ⚡ **Smart Cart Builder** — intent → full editable cart in one sentence
 - 🔍 **AI Comparison** — "best earbuds under ₹2000 with bass" → side-by-side card, best-pick badge
+- 👥 **Group Cart (Social Cart)** — Shop together in real-time. Share a link, friends add items, and Nia checks for conflicts.
 - 🚨 **Emergency Mode** — 8 categories (fever, baby care, surprise guests...) → curated kit + ETA
 - 🔄 **Reorder Rituals** — recurring bundles detected automatically, one-click reorder
 - 📉 **Predictive Reorder** — consumption cycle learning, "your milk runs out in 2 days" nudge
 - 🔀 **Smart Substitutions** — out-of-stock item → Nia proposes equivalent, doesn't cancel
+- 🔒 **Secure Authentication** — Seamless consumer login and profile management via Clerk.
 - 🌐 **Hinglish support** — responds in the same Hindi/English mix the user wrote in
 - 🎯 **Confidence scores** — every AI recommendation shows match % + plain-English reason
 
@@ -100,7 +104,7 @@ graph TD
 |---|---|
 | **Frontend** | Next.js 14, React 18, TypeScript, Tailwind CSS, Zustand, Framer Motion, Recharts |
 | **AI Backend** | Groq API (llama-3.3-70b-versatile), OpenAI-compatible schemas |
-| **Data Layer (Mock)** | In-memory Zustand stores, client-side semantic search, consumption rules |
+| **Data Layer & Auth** | Supabase (Database/Real-time sync), Clerk (Authentication), In-memory Zustand stores |
 | **Infrastructure** | Vercel |
 
 ### Folder Structure
@@ -109,9 +113,13 @@ graph TD
 nia-amazon-now/
 ├── app/
 │   ├── api/nia/route.ts          # POST /api/nia — Groq agent loop + mock matcher
+│   ├── category/                 # Product category pages
 │   ├── compare/page.tsx          # Full comparison page (/compare?ids=...)
 │   ├── emergency/page.tsx        # Emergency Mode — 8 kit categories
+│   ├── express-checkout/         # Express checkout flow
+│   ├── payment/                  # Payment processing pages
 │   ├── rituals/page.tsx          # Saved reorder bundles
+│   ├── search/                   # Manual product search
 │   ├── seller/
 │   │   ├── layout.tsx            # Auth guard + sidebar
 │   │   ├── page.tsx              # Seller dashboard
@@ -120,6 +128,9 @@ nia-amazon-now/
 │   │   ├── listings/page.tsx
 │   │   ├── optimization/page.tsx # Nia-powered listing optimizer
 │   │   └── analytics/page.tsx
+│   ├── sign-in/                  # Clerk sign-in pages
+│   ├── sign-up/                  # Clerk sign-up pages
+│   ├── social-cart/              # Real-time group cart feature
 │   └── page.tsx                  # Consumer landing page
 ├── components/
 │   ├── layout/
@@ -195,7 +206,7 @@ Visit these URLs to see the core features:
 
 > **Demo Credentials**
 > 
-> **Consumer:** No login needed — just open `localhost:3000`.
+> **Consumer:** Login required via Clerk (Sign in / Sign up flow).
 > 
 > **Seller:** `localhost:3000/seller/login`
 > - Email: `seller@techzone.in`
@@ -211,7 +222,7 @@ Visit these URLs to see the core features:
 3. Expected Result: A CartSummaryCard appears containing 6 curated items totaling ~₹290 with a ~10 min delivery ETA.
 4. Follow-up: Type `"make it cheaper"` to see Nia refine the cart with a lower total.
 <br>
-<img src="[SCREENSHOT_PLACEHOLDER]" alt="Movie Night Cart" width="400" />
+<img src="./public/Screenshot%202026-06-15%20203328.png" alt="Movie Night Cart" width="400" />
 </details>
 
 <details>
@@ -221,7 +232,7 @@ Visit these URLs to see the core features:
 2. Type: `"best wireless earbuds under ₹2000 good bass"`
 3. Expected Result: A ComparisonCard displays 3 products side-by-side. The boAt Airdopes will be highlighted as the best pick with a 91% confidence score.
 <br>
-<img src="[SCREENSHOT_PLACEHOLDER]" alt="AI Comparison" width="400" />
+<img src="./public/Screenshot%202026-06-15%20202840.png" alt="AI Comparison" width="400" />
 </details>
 
 <details>
@@ -232,7 +243,7 @@ Visit these URLs to see the core features:
    *(Alternative: Type `"I have a fever"` directly into Nia).*
 3. Expected Result: An EmergencyKitCard shows 5 essential items totaling ~₹312 with an expedited ~12 min delivery ETA and an "Order Now" CTA.
 <br>
-<img src="[SCREENSHOT_PLACEHOLDER]" alt="Emergency Mode" width="400" />
+<img src="./public/Screenshot%202026-06-15%20203700.png" alt="Emergency Mode" width="400" />
 </details>
 
 <details>
@@ -242,11 +253,22 @@ Visit these URLs to see the core features:
 2. Type: `"birthday party for 10 kids"`
 3. Expected Result: A full party cart is instantly built with 8 relevant items totaling ~₹660.
 <br>
-<img src="[SCREENSHOT_PLACEHOLDER]" alt="Birthday Party Kit" width="400" />
+<img src="./public/Screenshot%202026-06-15%20203817.png" alt="Birthday Party Kit" width="400" />
 </details>
 
 <details>
-<summary>📈 Flow 5: Seller Opportunity</summary>
+<summary>👥 Flow 5: Group Cart (Social Cart)</summary>
+
+1. Click on "Group Cart" or navigate to `/social-cart`.
+2. Pick a vibe emoji and enter a cart name (e.g., "Team Lunch").
+3. Click "Create & Share Cart" to get a shareable link.
+4. Share the link with friends to shop together in real-time.
+<br>
+<img src="./public/Screenshot%202026-06-15%20204206.png" alt="Group Cart" width="400" />
+</details>
+
+<details>
+<summary>📈 Flow 6: Seller Opportunity</summary>
 
 1. Go to `localhost:3000/seller/login` and log in with `seller@techzone.in` / `demo123`.
 2. Open the Dashboard and click **Intent Gaps**.
@@ -254,7 +276,7 @@ Visit these URLs to see the core features:
 4. Click **Fix listing**.
 5. Expected Result: The Optimization Chat opens pre-loaded with the query, ready to help the seller adjust their listing to capture this unmet demand.
 <br>
-<img src="[SCREENSHOT_PLACEHOLDER]" alt="Seller Opportunity" width="400" />
+<img src="./public/Screenshot%202026-06-15%20204339.png" alt="Seller Opportunity" width="400" />
 </details>
 
 <details>
@@ -354,9 +376,9 @@ The following are conscious scope decisions for the 48-hour build window, not bu
 
 | Feature | Demo behaviour | Production path |
 |---|---|---|
-| **Checkout** | Toast: "not available in demo" | Amazon Pay + address book + 1-tap confirm |
 | **Inventory & ETA** | Mock (seeded data) | Amazon Now dark-store inventory API |
-| **Consumer auth** | No login required | Amazon account OAuth (same as amazon.in) |
+| **Consumer auth** | Clerk Auth | Amazon account OAuth (same as amazon.in) |
+| **Database** | Supabase | DynamoDB + AppSync |
 | **AI responses** | Mock-first for 5 flows, Groq for others | Amazon Bedrock (Claude Sonnet) — 1-line swap |
 | **Push notifications** | Only while tab is open | Web Push API + SNS background delivery |
 | **Visual search** | Mic/camera buttons visible, not functional | Bedrock multimodal + Rekognition |
@@ -380,9 +402,11 @@ The following are conscious scope decisions for the 48-hour build window, not bu
 - [x] Groq integration (free tier, function calling, mock-first routing)
 
 **Phase 2 (post-hackathon):**
-- [ ] Real checkout (Amazon Pay integration)
+- [x] Consumer login (Clerk Auth)
+- [x] Express Checkout / Payment flow structure
+- [x] Group Cart / Social Cart via Supabase Real-time
+- [ ] Real checkout processing (Amazon Pay integration)
 - [ ] Live inventory (Amazon Now dark-store API)
-- [ ] Consumer login (Amazon account OAuth)
 - [ ] Voice mode (Web Speech API input + Amazon Polly output)
 - [ ] Visual search (Bedrock multimodal + Rekognition)
 - [ ] Streaming responses (SSE token-by-token rendering)
@@ -397,15 +421,14 @@ The following are conscious scope decisions for the 48-hour build window, not bu
 
 ## Team
 
-| Name |
-| Rajveer Yadav|  
-| Pranjal Chaudhary|  
-| Priyanshu Pal|
+| Rajveer Yadav 
+| Pranjal Chaudhary
+| Priyanshu Pal
 
 ## Acknowledgments
 
 - Groq for the free, fast inference API that made zero-budget AI possible
-- Amazon Now team for the brief that inspired this
+- Amazon team for the brief that inspired this
 - Vercel for free deployment
 - Key open-source packages: Next.js, Zustand, Framer Motion, Recharts, Tailwind
 
