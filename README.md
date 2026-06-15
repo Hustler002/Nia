@@ -1,7 +1,7 @@
 <div align="center">
   <h1>🛒✨ Nia — Now Intelligent Assistant</h1>
   <p><em>Delivery got fast. Deciding does too.</em></p>
-  <p>Built for Amazon HackOn 6.0 · Team BitMoggers</p>
+  <p>Built for [HACKON] · [15 June 2026] · Team [BitMoggers]</p>
   
   <p>
     <img src="https://img.shields.io/badge/Live-Demo-brightgreen.svg" alt="Live Demo" />
