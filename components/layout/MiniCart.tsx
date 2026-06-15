@@ -1,9 +1,7 @@
 'use client';
 
 import { useCartStore } from '@/lib/stores/useCartStore';
-import { useNiaChatStore } from '@/lib/useNiaStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
 
 export default function MiniCart() {
   const { items, isOpen, closeCart, removeItem, updateQuantity } = useCartStore();
@@ -11,27 +9,7 @@ export default function MiniCart() {
   const totalPrice = useCartStore((s) => s.getTotalPrice());
   const maxETA = items.length > 0 ? Math.max(...items.map((i) => i.eta || 10)) : 0;
 
-  // Nia awareness for panel coexistence
-  const isNiaOpen = useNiaChatStore((s) => s.isOpen);
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  // Desktop/mobile detection
-  useEffect(() => {
-    const check = () => setIsDesktop(window.innerWidth >= 640);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  // Mobile: auto-close Nia when cart opens (cart takes priority)
-  useEffect(() => {
-    if (isOpen && !isDesktop && isNiaOpen) {
-      useNiaChatStore.getState().close();
-    }
-  }, [isOpen, isDesktop, isNiaOpen]);
-
   return (
-   <>
     <AnimatePresence>
       {isOpen && (
         <>
@@ -162,17 +140,5 @@ export default function MiniCart() {
         </>
       )}
     </AnimatePresence>
-
-    {/* Minimized cart pill — visible on mobile when displaced by Nia */}
-    {!isOpen && isNiaOpen && !isDesktop && totalItems > 0 && (
-      <button
-        onClick={() => useCartStore.getState().openCart()}
-        className="fixed bottom-24 left-4 z-[1000] px-4 py-2.5 bg-[#FF9900] text-white rounded-full shadow-lg flex items-center gap-2 sm:hidden animate-in fade-in slide-in-from-left-4 duration-300"
-      >
-        <span className="text-base">🛒</span>
-        <span className="text-sm font-semibold">{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
-      </button>
-    )}
-   </>
   );
 }

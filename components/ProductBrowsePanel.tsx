@@ -304,10 +304,13 @@ export default function ProductBrowsePanel() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 sm:left-auto sm:translate-x-0 sm:right-[440px]"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000] sm:left-auto sm:translate-x-0 sm:right-[440px]"
           >
             <button
-              onClick={() => setCartOpen(true)}
+              onClick={() => {
+                useNiaChatStore.getState().close();
+                setCartOpen(true);
+              }}
               className="flex items-center gap-3 bg-[#232F3E] text-white px-5 py-3 rounded-md shadow-lg hover:bg-[#37475A] transition-all"
             >
               <div className="relative">
