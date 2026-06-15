@@ -113,8 +113,8 @@ export default function ProductBrowsePanel() {
     filtered = CATALOG.filter(p => p.category === browseCategory);
   }
 
-  // Limit visible items to 2 rows: 8 on desktop (4 cols+), 4 on mobile (2 cols)
-  const INITIAL_VISIBLE = 8;
+  // Limit visible items to 6 initially to keep the view compact
+  const INITIAL_VISIBLE = 6;
   const visibleProducts = isExpanded ? filtered : filtered.slice(0, INITIAL_VISIBLE);
 
   // Always show Suggested tab (time-based), and it stays first
