@@ -12,7 +12,7 @@
     <img src="https://img.shields.io/badge/Mobile-Responsive-blue.svg" alt="Mobile: Responsive" />
   </p>
 
-  <h3><a href="[VERCEL_DEPLOY_URL]">▶ Try the Live Demo →</a></h3>
+  <h3><a href="https://bit-moggers-nia.vercel.app/">▶ Try the Live Demo →</a></h3>
 </div>
 
 ---
