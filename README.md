@@ -397,11 +397,10 @@ The following are conscious scope decisions for the 48-hour build window, not bu
 
 ## Team
 
-| Name | Role |
-|---|---|
-| [Team Member 1] | Full-stack + AI integration |
-| [Team Member 2] | UI/UX + Frontend |
-| [Team Member 3] | Data Layer + Mocks |
+| Name |
+| Rajveer |  
+| Pranjal |  
+| Priyanshu |
 
 ## Acknowledgments
 
