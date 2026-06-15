@@ -127,11 +127,10 @@ export default function EmergencyPage() {
                     }, 50);
                   }
                 }}
-                className={`w-full h-full p-4 rounded-sm border-2 text-left flex flex-col items-center justify-center transition-all ${
-                  selectedCategory?.id === category.id 
-                    ? 'border-transparent shadow-md scale-[1.02]' 
-                    : 'border-transparent hover:scale-105'
-                }`}
+                className={`w-full h-full p-4 rounded-sm border-2 text-left flex flex-col items-center justify-center transition-all ${selectedCategory?.id === category.id
+                  ? 'border-transparent shadow-md scale-[1.02]'
+                  : 'border-transparent hover:scale-105'
+                  }`}
                 style={{
                   backgroundColor: `${category.color}15`, // 15% opacity trick
                   borderColor: selectedCategory?.id === category.id ? category.color : 'transparent'
@@ -155,7 +154,7 @@ export default function EmergencyPage() {
 
         {/* Expanded View */}
         {selectedCategory && (
-          <div 
+          <div
             ref={selectedRef}
             className="mt-8 bg-white rounded-sm shadow-md overflow-hidden border border-[#D5D9D9] animate-in fade-in slide-in-from-bottom-4 duration-300"
           >
@@ -166,7 +165,7 @@ export default function EmergencyPage() {
                 <p className="text-gray-600">Carefully curated items for immediate relief.</p>
               </div>
             </div>
-            
+
             <div className="p-6">
               <div className="space-y-4 mb-6">
                 {selectedCategory.kit.map(item => (
@@ -192,7 +191,7 @@ export default function EmergencyPage() {
                     ⚡ Fastest available: ~8 min from Central Hub
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col w-full md:w-auto gap-3">
                   <button
                     onClick={() => {
