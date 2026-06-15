@@ -61,6 +61,7 @@ export default function SocialCartRoomPage() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [shareSupported] = useState(() => typeof navigator !== 'undefined' && !!navigator.share);
   const [checkingOut, setCheckingOut] = useState(false);
 
   // Load cart on mount
@@ -96,8 +97,36 @@ export default function SocialCartRoomPage() {
     [addItem]
   );
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+  const handleShare = async () => {
+    const url = window.location.href;
+    const cartTitle = cart?.name || 'Group Cart';
+
+    if (shareSupported) {
+      try {
+        await navigator.share({
+          title: `Join my ${cartTitle} on Amazon Now`,
+          text: `Hey! I've started a group cart. Click the link to add your items and we'll checkout together 🛒`,
+          url,
+        });
+        return;
+      } catch (err) {
+        // User dismissed the share sheet — that's fine, fall through to copy
+        if ((err as Error).name === 'AbortError') return;
+      }
+    }
+
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Last-resort fallback for older browsers
+      const el = document.createElement('textarea');
+      el.value = url;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2500);
   };
@@ -180,19 +209,26 @@ export default function SocialCartRoomPage() {
             </div>
 
             <button
-              onClick={handleCopyLink}
+              onClick={handleShare}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                linkCopied ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                linkCopied ? 'bg-green-100 text-green-700' : 'bg-[#00838F] text-white hover:bg-[#006d75]'
               }`}
             >
               {linkCopied ? (
-                <>✓ Copied!</>
-              ) : (
+                <>✓ Link Copied!</>
+              ) : shareSupported ? (
                 <>
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                   </svg>
-                  Share
+                  Invite Friends
+                </>
+              ) : (
+                <>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy Link
                 </>
               )}
             </button>
